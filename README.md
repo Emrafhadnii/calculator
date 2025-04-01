@@ -4,8 +4,8 @@
     Notes:
     1. <lower_> and <upper_> can be left empty for indefinite integrals 
         (e.g., "\int(<argument_>) \, d<variable_>")
-    2. The input <argument_> to trigonometric and logarithmic functions should be linear 
-        (e.g., sin(ax + b) or ln(cx + d))
+    2. The input argument to trigonometric and logarithmic functions should be simple (e.g., sin(x) or ln(x)), 
+        while for exponential functions, it should be linear (e.g., e^{ax + b})
 
 2. Derivatives (∂): "\frac{d^{<order_>}(<function_>)}{d<variable_>^{<order_>}}"
     Notes:
