@@ -77,17 +77,17 @@ class Calculator:
                 term += "^1"
                 index = term.find("^")
         
-        power = int(term[index+1:].replace("{","").replace("}",""))
+        power = float(term[index+1:].replace("{","").replace("}",""))
         if power == 0:
             new_power = 0
             new_base = 0
         else:
-            new_power = int(power)-1
+            new_power = float(power)-1
             index = term.find(var)
             if term[:index] == "":
                 term = "1" + term
                 index += 1
-            new_base = int(term[:index])*power
+            new_base = float(term[:index])*power
         new_base = "" if new_base == 1 else new_base
         new_power = "" if new_power == 1 else new_power
         
@@ -118,8 +118,8 @@ class Calculator:
         if term[0] == var:
             term = "1" + term
             index += 1
-        power = int(term[index+1:])
-        base = int(term[:term.find(var)])
+        power = float(term[index+1:])
+        base = float(term[:term.find(var)])
         new_power = power+1
         new_base = base/new_power
 
@@ -127,7 +127,7 @@ class Calculator:
             primary_term = f"({new_base})*{var}^({new_power})"
 
         else:
-            value_term = (new_base*int(upper)**new_power) - (new_base*int(lower)**new_power)
+            value_term = (new_base*float(upper)**new_power) - (new_base*float(lower)**new_power)
 
         return value_term,primary_term,new_base,new_power
 
@@ -146,9 +146,9 @@ class Calculator:
         start = term.find("{")
         end = term.find("}")
         if start != -1:
-            power = int(term[start+1 : end])
+            power = float(term[start+1 : end])
         else:
-            power = int(term[index+1 : exp])
+            power = float(term[index+1 : exp])
 
         if power == 0:
             new_power = 0
@@ -159,7 +159,7 @@ class Calculator:
 
         if term[:term.find("\\")] == "":
             term = "1" + term
-        base = int(term[:term.find("\\")])
+        base = float(term[:term.find("\\")])
         new_base = base*power
 
         new_base = "" if new_base == 1 else new_base
@@ -219,7 +219,7 @@ class Calculator:
             under_line = term.find("_")
             log_base = 10
             if under_line != -1:
-                log_base = int(term[under_line+1 : term.find("^")])
+                log_base = float(term[under_line+1 : term.find("^")])
 
             parenthesis_derived = parenthesis_derived.replace("*","",1)
             derived_term = f"({parenthesis_derived}/{term[term.find("(") : term.rfind(")")]})ln({log_base})"
@@ -242,7 +242,7 @@ class Calculator:
         primary_term = ""
         if term[0] == "\\":
             term = "1" + term
-        base = int(term[:term.find("\\")])
+        base = float(term[:term.find("\\")])
         power = 1
         
         new_power = 1
@@ -276,7 +276,7 @@ class Calculator:
             under_line = term.find("_")
             log_base = 10
             if under_line != -1:
-                log_base = int(term[under_line+1 : term.find("^")])
+                log_base = float(term[under_line+1 : term.find("^")])
 
             if lower is None or upper is None:
                 primary_term = f"({new_base})*({var}*(log_{log_base}({var})-1))"
@@ -342,7 +342,7 @@ class Calculator:
         if lower is None or upper is None:
             primary_term = f"({new_base})*e^({new_power})"
         else:
-            value_term = abs((new_base*math.e**(int(upper)*power_value)) - (new_base*math.e**(int(lower)*power_value)))
+            value_term = abs((new_base*math.e**(float(upper)*power_value)) - (new_base*math.e**(float(lower)*power_value)))
 
         return value_term,primary_term,new_base,new_power
 
@@ -397,17 +397,17 @@ class Calculator:
             primary_term = ""
             value_term = 0
             if term.find(var) == -1:
-                primary_term = f"{function}{var}"
-            else:
-                term = term.replace(f"-{var}",f"-1{var}")
+                term = f"{term}{var}^0"
+            
+            term = term.replace(f"-{var}",f"-1{var}")
 
-                if term.find("e^") != -1 and var != "e":
-                    value_term,primary_term,new_base,new_power = self._exponential_integral(term,lower,upper)
-                elif term.find("\\") != -1:
-                    value_term,primary_term,new_base,new_power = self._trigonometric_integral(term,lower,upper)
-                else:
-                    value_term,primary_term,new_base,new_power = self._polynominal_integral(term,lower,upper)
-                    
+            if term.find("e^") != -1 and var != "e":
+                value_term,primary_term,new_base,new_power = self._exponential_integral(term,lower,upper)
+            elif term.find("\\") != -1:
+                value_term,primary_term,new_base,new_power = self._trigonometric_integral(term,lower,upper)
+            else:
+                value_term,primary_term,new_base,new_power = self._polynominal_integral(term,lower,upper)
+                
 
             if new_base == 1:
                 primary_term = primary_term.replace(f"({new_base})*","",1)
@@ -416,6 +416,8 @@ class Calculator:
             if new_power == 0:
                 primary_term = primary_term.replace(f"*{var}^({new_power})","",1)        
 
+            print(value_term)
+            print(primary_term)
             value += value_term
             primary += primary_term + "+"
             primary = primary.replace("+-","-")
@@ -448,7 +450,7 @@ class Calculator:
 
 lp1 = LatexParser("\\frac{d(\\log(3x^{12}+12x) + x^2)}{dx}")
 lp2 = LatexParser("\\frac{d(12x^2-2x+1)}{dx}")
-lp3 = LatexParser("\\int_0^1(e^{2x}) \, dx")
+lp3 = LatexParser("\\int_0^1(e^{2x} + 1) \, dx")
 lp4 = LatexParser("\\frac{d(e^{x^2-x})}{dx}")
 print(lp3.parse())
 calc1 = Calculator(lp3.parse())
