@@ -127,7 +127,7 @@ class Calculator:
             primary_term = f"({new_base})*{var}^({new_power})"
 
         else:
-            value_term = (new_base*float(upper)**new_power) - (new_base*float(lower)**new_power)
+            value_term = (new_base*upper**new_power) - (new_base*lower**new_power)
 
         return value_term,primary_term,new_base,new_power
 
@@ -245,32 +245,32 @@ class Calculator:
         base = float(term[:term.find("\\")])
         power = 1
         
-        new_power = 1
+        new_power = power
         new_base = base
 
         if term.find("\\sin") != -1:
             if lower is None or upper is None:
                 primary_term = f"({-new_base})*(cos({var})"
             else:
-                value_term = abs((-new_base*math.cos(float(upper))) - (-new_base*math.cos(float(lower))))
+                value_term = new_base*abs((math.cos(upper)) - (math.cos(lower)))
 
         elif term.find("\\cos") != -1:
             if lower is None or upper is None:
                 primary_term = f"({new_base})*sin({var})"
             else:
-                value_term = abs((new_base*math.sin(float(upper))) - (new_base*math.sin(float(lower))))
+                value_term = new_base*abs((math.sin(upper)) - (math.sin(lower)))
 
         elif term.find("\\tan") != -1:
             if lower is None or upper is None:
                 primary_term = f"({-new_base})*ln|cos({var})|"
             else:
-                value_term = abs((-new_base*math.log(math.cos(float(upper)),math.e)) - (-new_base*math.log(math.cos(float(lower)),math.e)))
+                value_term = new_base*abs((math.log(math.cos(upper),math.e)) - (math.log(math.cos(lower),math.e)))
 
         elif term.find("\\cot") != -1:
             if lower is None or upper is None:
                 primary_term = f"({new_base})*ln|sin({var})|"
             else:
-                value_term = abs((new_base*math.log(math.sin(float(upper)),math.e)) - (new_base*math.log(math.sin(float(lower)),math.e)))
+                value_term = new_base*abs((math.log(math.sin(upper),math.e)) - (math.log(math.sin(lower),math.e)))
 
         elif term.find("\\log") != -1:
             under_line = term.find("_")
@@ -279,15 +279,18 @@ class Calculator:
                 log_base = float(term[under_line+1 : term.find("^")])
 
             if lower is None or upper is None:
-                primary_term = f"({new_base})*({var}*(log_{log_base}({var})-1))"
+                primary_term = f"({new_base})*({var}*(log_{log_base}({var})-(1/ln({log_base}))))"
             else:
-                value_term = abs((new_base*float(upper)(math.log(float(upper),log_base)-1)) - (new_base*float(lower)(math.log(float(lower),log_base)-1)))
+                
+                value_term = new_base*abs((upper*(math.log(upper,log_base)-(1/math.log(log_base,math.e)))) 
+                                          - 
+                                          (lower*(math.log(lower,log_base)-(1/math.log(log_base,math.e)))))
             
         elif term.find("\\ln") != -1:
             if lower is None or upper is None:
                 primary_term = f"({new_base})*({var}*(ln({var})-1))"
             else:
-                value_term = abs((new_base*float(upper)(math.log(float(upper),math.e)-1)) - (new_base*float(lower)(math.log(float(lower),math.e)-1)))
+                value_term = new_base*abs((upper(math.log(upper,math.e)-1)) - (lower(math.log(lower,math.e)-1)))
 
         return value_term,primary_term,new_base,new_power
 
@@ -342,7 +345,7 @@ class Calculator:
         if lower is None or upper is None:
             primary_term = f"({new_base})*e^({new_power})"
         else:
-            value_term = abs((new_base*math.e**(float(upper)*power_value)) - (new_base*math.e**(float(lower)*power_value)))
+            value_term = abs((new_base*math.e**(upper*power_value)) - (new_base*math.e**(lower*power_value)))
 
         return value_term,primary_term,new_base,new_power
 
@@ -416,8 +419,6 @@ class Calculator:
             if new_power == 0:
                 primary_term = primary_term.replace(f"*{var}^({new_power})","",1)        
 
-            print(value_term)
-            print(primary_term)
             value += value_term
             primary += primary_term + "+"
             primary = primary.replace("+-","-")
@@ -452,6 +453,8 @@ lp1 = LatexParser("\\frac{d(\\log(3x^{12}+12x) + x^2)}{dx}")
 lp2 = LatexParser("\\frac{d(12x^2-2x+1)}{dx}")
 lp3 = LatexParser("\\int_0^1(e^{2x} + 1) \, dx")
 lp4 = LatexParser("\\frac{d(e^{x^2-x})}{dx}")
-print(lp1.parse())
-calc1 = Calculator(lp1.parse())
+lp5 = LatexParser("\\int_5^10(\\log(x)) \, dx")
+
+print(lp5.parse())
+calc1 = Calculator(lp5.parse())
 print(calc1.result())

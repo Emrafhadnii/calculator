@@ -32,15 +32,15 @@ class LatexParser:
         if self._expression[self._expression.find("int") + 3] == "_":
             lindex = self._expression.find("_")
             if self._expression[lindex+1] != "{":
-                lower = int(self._expression[lindex+1 : self._expression.find("^")])
+                lower = float(self._expression[lindex+1 : self._expression.find("^")])
             else:
-                lower = int(self._expression[lindex+2 : self._expression.find("}")])
+                lower = float(self._expression[lindex+2 : self._expression.find("}")])
             
             uindex = self._expression.find("^")
             if self._expression[uindex+1] != "{":
-                upper = int(self._expression[uindex+1 : self._expression.find("(")])
+                upper = float(self._expression[uindex+1 : self._expression.find("(")])
             else:
-                upper = int(self._expression[uindex+2 : self._expression.find("(")-1])
+                upper = float(self._expression[uindex+2 : self._expression.find("(")-1])
         else:
             lower,upper = None,None
 
