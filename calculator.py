@@ -20,7 +20,7 @@ class Calculator:
             return None
 
 
-    def linear_computer(self):
+    def polynomial_computation(self):
         pass
 
 
