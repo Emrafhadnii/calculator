@@ -99,7 +99,7 @@ class Calculator:
             if new_power != "":
                 derived = f"{new_base}x^{new_power}"
             else:
-                derived = derived = f"{new_base}x{new_power}"
+                derived = derived = f"{new_base}x"
 
         return derived
 
@@ -135,7 +135,7 @@ class Calculator:
     def _trigonometric_derivative(self, term: str):
         exp = term.find("(")
         index = term.find("^") 
-        var = self.parsed_input['vaiable']
+        var = self.parsed_input['variable']
         derived_term = ""
 
         if index == -1 or index > exp:
@@ -143,13 +143,13 @@ class Calculator:
             index = exp
             exp += 2
 
+        index = term.find("^")
         start = term.find("{")
         end = term.find("}")
-        if start != -1:
+        if start != -1 and start < exp:
             power = float(term[start+1 : end])
         else:
             power = float(term[index+1 : exp])
-
         if power == 0:
             new_power = 0
         elif power == 1:
@@ -178,32 +178,32 @@ class Calculator:
         if term.find("\\sin") != -1:
             temp_der = ""
             if power > 1:
-                temp_der = f"sin^{new_power}({term[term.find("(") : term.find(")")]})"
+                temp_der = f"*sin^{new_power}{term[term.find("(") : term.find(")")]})"
 
             if new_power == "":
                 temp_der = temp_der.replace("^","",1)
 
-            derived_term = f"({parenthesis_derived}{new_base}cos{term[term.find("(") : term.find(")")]})" + temp_der
+            derived_term = f"({parenthesis_derived}({new_base})*cos{term[term.find("(") : term.find(")")]})" + temp_der
 
         elif term.find("\\cos") != -1:
             temp_der = ""
             if power > 1:
-                temp_der = f"cos^{new_power}{term[term.find("(") : term.find(")")]})"
+                temp_der = f"*cos^{new_power}{term[term.find("(") : term.find(")")]})"
 
             if new_power == "":
                 temp_der = temp_der.replace("^","",1)
 
-            derived_term = f"-({parenthesis_derived}{new_base}sin{term[term.find("(") : term.find(")")]})" + temp_der
+            derived_term = f"-({parenthesis_derived}({new_base})*sin{term[term.find("(") : term.find(")")]})" + temp_der
 
         elif term.find("\\tan") != -1:
             temp_der = ""
             if power > 1:
-                temp_der = f"tan^{new_power}{term[term.find("(") : term.find(")")]})"
+                temp_der = f"*tan^{new_power}{term[term.find("(") : term.find(")")]})"
             
             if new_power == "":
                 temp_der = temp_der.replace("^","",1)
 
-            derived_term = f"({parenthesis_derived}{new_base}(1+tan^2{term[term.find("(") : term.find(")")]}))" + temp_der
+            derived_term = f"({parenthesis_derived}({new_base})*(1+tan^2{term[term.find("(") : term.find(")")]}))" + temp_der
 
         elif term.find("\\cot") != -1:
             temp_der = ""
@@ -213,7 +213,7 @@ class Calculator:
             if new_power == "":
                 temp_der = temp_der.replace("^","",1)
 
-            derived_term = f"({parenthesis_derived}{-new_base}(1+cot^2{term[term.find("(") : term.find(")")]}))" + temp_der
+            derived_term = f"-({parenthesis_derived}({new_base})*(1+cot^2{term[term.find("(") : term.find(")")]}))" + temp_der
 
         elif term.find("\\log") != -1:
             under_line = term.find("_")
@@ -222,18 +222,18 @@ class Calculator:
                 log_base = float(term[under_line+1 : term.find("^")])
 
             parenthesis_derived = parenthesis_derived.replace("*","",1)
-            derived_term = f"({parenthesis_derived}/{term[term.find("(") : term.rfind(")")]})ln({log_base})"
+            derived_term = f"({parenthesis_derived}/{term[term.find("(") : term.rfind(")")]})*ln({log_base})"
             
 
         elif term.find("\\ln") != -1:
             parenthesis_derived = parenthesis_derived.replace("*","",1)
             top = "1" if parenthesis_derived == "" else parenthesis_derived
-            derived_term = f"({top}/{var}"
+            derived_term = f"({top}/({term[term.find("(")+1 : term.rfind(")")]})"
 
         if parenthesis_derived == "":
             derived_term = derived_term.replace("(","",1)
 
-        return derived_term
+        return derived_term.replace("*()","").replace("()*","")
 
 
     def _trigonometric_integral(self, term: str, lower, upper):
@@ -452,6 +452,6 @@ lp1 = LatexParser("\\frac{d(\\log(3x^{12}+12x) + x^2)}{dx}")
 lp2 = LatexParser("\\frac{d(12x^2-2x+1)}{dx}")
 lp3 = LatexParser("\\int_0^1(e^{2x} + 1) \, dx")
 lp4 = LatexParser("\\frac{d(e^{x^2-x})}{dx}")
-print(lp3.parse())
-calc1 = Calculator(lp3.parse())
+print(lp1.parse())
+calc1 = Calculator(lp1.parse())
 print(calc1.result())
