@@ -23,4 +23,7 @@
         `Inverse`: \inverse (<matrix_syntax>)
  
 
+# How to Run the Calculator
 
+1. `bash`
+   python calculator.py
