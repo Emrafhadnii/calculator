@@ -7,7 +7,7 @@ class LatexParser:
     def __init__(self, latex_input: str):
         self._expression = latex_input.replace(" ","")
 
-    def derivative_parser(self) -> Dict[str, str, str, int]:
+    def derivative_parser(self) -> Dict[str, Union[str, int]]:
         numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("dx")-2]
         denominator = self._expression[self._expression.rfind("dx") : self._expression.rfind("}")]
         var = denominator[1]
@@ -30,7 +30,7 @@ class LatexParser:
         }
 
 
-    def integral_parser(self) -> Dict[str, str, str, float, float]:
+    def integral_parser(self) -> Dict[str, Union[str, float]]:
         self._expression = self._expression.replace(" ","")
         if self._expression[self._expression.find("int") + 3] == "_":
             lindex = self._expression.find("_")
@@ -59,7 +59,7 @@ class LatexParser:
         }
 
 
-    def matrix_parser(self) -> Dict[str, Matrix, Matrix, str]:
+    def matrix_parser(self) -> Dict[str, Union[str, Matrix]]:
         self._expression = self._expression.replace(" ","")
         
         start = self._expression.find("}")
@@ -88,9 +88,9 @@ class LatexParser:
 
     def parse(self) -> Optional[
                             Union[
-                                Dict[str, str, str, int],
-                                Dict[str, str, str, float, float],
-                                Dict[str, Matrix, Matrix, str]]]:
+                                Dict[str, Union[str, int]],
+                                Dict[str, Union[str, float]],
+                                Dict[str, Union[str, Matrix]]]]:
         
         function = re.findall(r'\\[a-zA-Z]+|\\.', self._expression)
         if function[0] == "\\frac":
