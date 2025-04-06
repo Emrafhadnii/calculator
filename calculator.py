@@ -1,15 +1,15 @@
 from parser import LatexParser
 import math
 from matrix import Matrix
-
+from typing import List,Optional,Tuple,Union
 
 class Calculator:
-    def __init__(self, parsed_input):
+    def __init__(self, parsed_input: str):
         self.parsed_input = parsed_input
         self.type = parsed_input.get('type')
     
 
-    def result(self):
+    def result(self) -> Optional[Union[str, float, Matrix]]:
         if self.type == 'derivative':
             return self.calculate_derivative()
         elif self.type == 'integral':
@@ -24,7 +24,7 @@ class Calculator:
         pass
 
 
-    def _split_terms(self, latex_str):
+    def _split_terms(self, latex_str: str)-> List:
         s = latex_str.replace(' ', '')
         terms = []
         current_term = []
@@ -64,7 +64,7 @@ class Calculator:
         return terms
 
 
-    def _polynomial_derivative(self, term: str):
+    def _polynomial_derivative(self, term: str) -> str:
         var = self.parsed_input['variable']
         if term.find(var) == -1:
             term += "^0"
@@ -104,7 +104,7 @@ class Calculator:
         return derived
 
 
-    def _polynominal_integral(self, term: str, lower, upper):
+    def _polynominal_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
         index = term.find("^")
         var = self.parsed_input['variable']
         value_term = 0
@@ -132,7 +132,7 @@ class Calculator:
         return value_term,primary_term,new_base,new_power
 
 
-    def _trigonometric_derivative(self, term: str):
+    def _trigonometric_derivative(self, term: str) -> str:
         exp = term.find("(")
         index = term.find("^") 
         var = self.parsed_input['variable']
@@ -236,7 +236,7 @@ class Calculator:
         return derived_term.replace("*()","").replace("()*","")
 
 
-    def _trigonometric_integral(self, term: str, lower, upper):
+    def _trigonometric_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
         var = self.parsed_input['variable']
         value_term = 0
         primary_term = ""
@@ -295,7 +295,7 @@ class Calculator:
         return value_term,primary_term,new_base,new_power
 
 
-    def _exponential_derivative(self, term: str):
+    def _exponential_derivative(self, term: str) -> str:
         index = term.find("^")
         if index != -1:
             power = term[index+1:]
@@ -322,7 +322,7 @@ class Calculator:
             return derived
 
 
-    def _exponential_integral(self, term: str, lower, upper):
+    def _exponential_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
         index = term.find("^")
         power = term[index+1 :].replace("{","",1).replace("}","",1)
         var = self.parsed_input['variable']
@@ -350,7 +350,7 @@ class Calculator:
         return value_term,primary_term,new_base,new_power
 
 
-    def calculate_derivative(self):
+    def calculate_derivative(self) -> str:
         derived = ""
         function = str(self.parsed_input['function'])    
         function = function.replace(" ","")
@@ -387,7 +387,7 @@ class Calculator:
         return derived
 
 
-    def calculate_integral(self):
+    def calculate_integral(self) -> Union[float,str]:
         function = str(self.parsed_input['function'])    
         function = function.replace(" ","")
         terms = self._split_terms(function)
@@ -426,7 +426,7 @@ class Calculator:
         return primary+"c" if lower is None or upper is None else value
 
 
-    def matrix_calculations(self):
+    def matrix_calculations(self) -> Union[Matrix,float]:
         matrix1 = Matrix(self.parsed_input['first'])
         matrix2 = Matrix(self.parsed_input['second'])
         op = self.parsed_input['op']

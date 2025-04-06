@@ -11,16 +11,16 @@ class Matrix:
     def __len__(self):
         return (self._rows,self._cols)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._matrix)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self._matrix == other._matrix
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return self._matrix != other._matrix
 
-    def __getitem__(self, index):   
+    def __getitem__(self, index) -> float:   
         if isinstance(index, tuple):
             row, col = index
             return self._matrix[row][col]
@@ -57,7 +57,7 @@ class Matrix:
             result = [
                 [[-other + elem for elem in row] for row in self._matrix]
             ]
-            return result
+            return Matrix(result)
         
         elif isinstance(other, Matrix):
             if self._rows != other._rows or self._cols != other._cols:
@@ -107,7 +107,7 @@ class Matrix:
         ]
         return Matrix(result)
 
-    def det(self):
+    def det(self) -> float:
         if self._rows != self._cols:
             raise ValueError("Determinant is only defined for square matrices")
 
@@ -128,7 +128,7 @@ class Matrix:
 
         return determinant
     
-    def issingular(self):
+    def issingular(self) -> bool:
         if(self.det() == 0):
             return True    
         else:

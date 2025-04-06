@@ -1,24 +1,26 @@
 import re
+from typing import Optional,Union,Dict
+from matrix import Matrix
 
 class LatexParser:
 
     def __init__(self, latex_input: str):
         self._expression = latex_input.replace(" ","")
 
-    def derivative_parser(self):
-        sorat = self._expression[self._expression.find("{")+1 : self._expression.rfind("dx")-2]
-        makhraj = self._expression[self._expression.rfind("dx") : self._expression.rfind("}")]
-        var = makhraj[1]
+    def derivative_parser(self) -> Dict[str, str, str, int]:
+        numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("dx")-2]
+        denominator = self._expression[self._expression.rfind("dx") : self._expression.rfind("}")]
+        var = denominator[1]
 
-        index = sorat.find("d^")
+        index = numerator.find("d^")
         if index != -1:
-            if sorat[index+2] == "{":
-                order = int(sorat[index+3 : sorat.find("}")])
+            if numerator[index+2] == "{":
+                order = int(numerator[index+3 : numerator.find("}")])
             else:
-                order = int(sorat[index+2 : sorat.find("(")])
+                order = int(numerator[index+2 : numerator.find("(")])
         else:
             order = 1
-        function = sorat[sorat.find("(")+1 : sorat.rfind(")")]
+        function = numerator[numerator.find("(")+1 : numerator.rfind(")")]
 
         return{
             'type': 'derivative',
@@ -27,7 +29,8 @@ class LatexParser:
             'order': order
         }
 
-    def integral_parser(self):
+
+    def integral_parser(self) -> Dict[str, str, str, float, float]:
         self._expression = self._expression.replace(" ","")
         if self._expression[self._expression.find("int") + 3] == "_":
             lindex = self._expression.find("_")
@@ -56,7 +59,7 @@ class LatexParser:
         }
 
 
-    def matrix_parser(self):
+    def matrix_parser(self) -> Dict[str, Matrix, Matrix, str]:
         self._expression = self._expression.replace(" ","")
         
         start = self._expression.find("}")
@@ -77,13 +80,18 @@ class LatexParser:
 
         return{
             'type': 'matrix operation',
-            'first': matrix1,
-            'second': matrix2,
+            'first': Matrix(matrix1),
+            'second': Matrix(matrix2),
             'op': operator
         }
 
 
-    def parse(self):
+    def parse(self) -> Optional[
+                            Union[
+                                Dict[str, str, str, int],
+                                Dict[str, str, str, float, float],
+                                Dict[str, Matrix, Matrix, str]]]:
+        
         function = re.findall(r'\\[a-zA-Z]+|\\.', self._expression)
         if function[0] == "\\frac":
             return self.derivative_parser()
@@ -91,7 +99,5 @@ class LatexParser:
             return self.integral_parser()
         elif function[0] == "\\begin":
             return self.matrix_parser()
-
-lp1 = LatexParser("\\frac{d(\cos(3x))}{dx}")
-lp2 = LatexParser("\\frac{d^{10}(x^2+x+1)}{dx^{10}}")
-lp3 = LatexParser("\\int (ax^2+bx+c) \, dx")
+        else:
+            return None
