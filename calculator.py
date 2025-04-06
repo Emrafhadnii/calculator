@@ -449,12 +449,20 @@ class Calculator:
         return result
     
 
-lp1 = LatexParser("\\frac{d(\\log(3x^{12}+12x) + x^2)}{dx}")
-lp2 = LatexParser("\\frac{d(12x^2-2x+1)}{dx}")
-lp3 = LatexParser("\\int_0^1(e^{2x} + 1) \, dx")
-lp4 = LatexParser("\\frac{d(e^{x^2-x})}{dx}")
-lp5 = LatexParser("\\int_5^10(\\log(x)) \, dx")
+while True:
+    latex_input = LatexParser(str(input("Enter LaTeX exprresion: ")))
+    if latex_input == "exit":
+        break
+    parsed = latex_input.parse()
+    calc = Calculator(parsed)
+    result = calc.result()
+    print(f"type: {parsed['type']} \nresult: {result}")
 
-print(lp5.parse())
-calc1 = Calculator(lp5.parse())
-print(calc1.result())
+"""
+sample inputs:
+1.\frac{d(\log(3x^{12}+12x) + x^2)}{dx}
+2.\frac{d(12x^2-2x+1)}{dx}
+3.\int(e^{2x} + 1) \, dx
+4.\frac{d(e^{x^2-x})}{dx}
+5.\int_5^10(\log(x)) \, dx
+"""
