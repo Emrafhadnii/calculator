@@ -487,5 +487,5 @@ sample inputs:
 3.\int(e^{2x} + 1) \, dx
 4.\frac{d(e^{x^2-x})}{dx}
 5.\int_5^10(\log(x)) \, dx
-6.\frac{d((2x)+(3x))}{dx}
+6.\frac{d(2x*3x)}{dx}
 """
