@@ -16,8 +16,7 @@ class Calculator:
             return self.calculate_integral()
         elif self.type == 'matrix operation':
             return self.matrix_calculations()
-        else:
-            return None
+        return None
 
 
     def polynomial_computation(self):
@@ -49,8 +48,10 @@ class Calculator:
             elif char == '}' or char == ')':
                 brace_level -= 1
             
-            if (char == '+' or char == '-') and brace_level == 0:
+            if char in "+-*" and brace_level == 0:
                 if current_term:
+                    if current_term[0] == "(" and current_term[-1] == (')'):
+                        current_term = current_term[1:-1]
                     terms.append(''.join(current_term))
                     current_term = []
                 if char == '-':
@@ -59,6 +60,8 @@ class Calculator:
                 current_term.append(char)
             i += 1
         if current_term:
+            if current_term[0] == "(" and current_term[-1] == (')'):
+                current_term = current_term[1:-1]
             terms.append(''.join(current_term))
         
         return terms
@@ -357,22 +360,40 @@ class Calculator:
         terms = self._split_terms(function)
         var = self.parsed_input['variable']
         for term in terms:
-
             term = term.replace(f"-{var}",f"-1{var}")
+            if function.find(f"{term}*") != -1 or function.find(f"({term})*") != -1:
+                second_term = terms[terms.index(term)+1]
 
-            if term.find("e^") != -1 and var != "e":
-                derived_term = self._exponential_derivative(term)
+                first = Calculator({
+                    'type': 'derivative',
+                    'function': term,
+                    'variable': var,
+                    'order': 1
+                })
+                second = Calculator({
+                    'type': 'derivative',
+                    'function': second_term,
+                    'variable': var,
+                    'order': 1
+                })
+                terms.remove(second_term)
+                derived_term = "(" + first.calculate_derivative() + f"*({second_term}))+"
+                derived_term += "(" + second.calculate_derivative() + f"*({term}))"
 
-            elif term.find("\\") != -1:
-                var_index = term.find(var)
-                if var_index == -1:
-                    new_power = 0
-                    new_base = 0
-                else:
-                    derived_term = self._trigonometric_derivative(term)
             else:
-                derived_term = self._polynomial_derivative(term)
-                
+                if term.find("e^") != -1 and var != "e":
+                    derived_term = self._exponential_derivative(term)
+
+                elif term.find("\\") != -1:
+                    var_index = term.find(var)
+                    if var_index == -1:
+                        new_power = 0
+                        new_base = 0
+                    else:
+                        derived_term = self._trigonometric_derivative(term)
+                else:
+                    derived_term = self._polynomial_derivative(term)
+                    
             if derived_term != "":
                 derived += derived_term + "+"
             else:
@@ -450,9 +471,10 @@ class Calculator:
     
 
 while True:
-    latex_input = LatexParser(str(input("Enter LaTeX exprresion: ")))
-    if latex_input == "exit":
+    user_input = str(input("Enter LaTeX exprresion: "))
+    if user_input == "exit":
         break
+    latex_input = LatexParser(user_input)
     parsed = latex_input.parse()
     calc = Calculator(parsed)
     result = calc.result()
@@ -465,4 +487,5 @@ sample inputs:
 3.\int(e^{2x} + 1) \, dx
 4.\frac{d(e^{x^2-x})}{dx}
 5.\int_5^10(\log(x)) \, dx
+6.\frac{d((2x)+(3x))}{dx}
 """

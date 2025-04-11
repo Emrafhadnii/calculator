@@ -99,5 +99,4 @@ class LatexParser:
             return self.integral_parser()
         elif function[0] == "\\begin":
             return self.matrix_parser()
-        else:
-            return None
+        return None
