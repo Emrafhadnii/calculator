@@ -1,5 +1,4 @@
 from typing import List
-import numpy as np
 
 class Matrix:
     
@@ -82,20 +81,20 @@ class Matrix:
             if self._rows != other._cols or self._cols != other._rows:
                 raise ValueError("Matrices must have the correct shapes for multiplication")
             result = []
-            temp_res = []
-            i,j,k = 0,0,0
+            i = 0
             while i < self._rows:
-                temp_res.append(self._matrix[i][j] * other._matrix[j][k])
-                j += 1
-                if j == self._cols:
-                    result.append(sum(temp_res))
-                    temp_res = []
-                    k += 1
+                row_result = []
+                k = 0
+                while k < other._cols:
+                    temp_res = 0
                     j = 0
-                if k == other._cols:
-                    k = 0
-                    i += 1
-            result = np.reshape(result, (self._rows,other._cols)).tolist()
+                    while j < self._cols:
+                        temp_res += self._matrix[i][j] * other._matrix[j][k]
+                        j += 1
+                    row_result.append(temp_res)
+                    k += 1
+                result.append(row_result)
+                i += 1
         else:
             raise TypeError("Unsupported operand type")
 
@@ -146,3 +145,4 @@ class Matrix:
                     tmplist.append(1/det * self._matrix[i][j])
                 newmatrix.append(tmplist)
         return Matrix(newmatrix)
+    
