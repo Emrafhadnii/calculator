@@ -467,7 +467,7 @@ class Calculator:
     
 
 while True:
-    user_input = str(input("Enter LaTeX exprresion: "))
+    user_input = str(input("Enter LaTeX expression: "))
     if user_input == "exit":
         break
     latex_input = LatexParser(user_input)
