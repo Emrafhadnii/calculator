@@ -3,9 +3,9 @@ from typing import Optional,Union,Dict
 from matrix import Matrix
 
 class LatexParser:
-
     def __init__(self, latex_input: str):
         self._expression = latex_input.replace(" ","")
+
 
     def derivative_parser(self) -> Dict[str, Union[str, int]]:
         numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("dx")-2]

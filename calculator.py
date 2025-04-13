@@ -19,10 +19,6 @@ class Calculator:
         return None
 
 
-    def polynomial_computation(self):
-        pass
-
-
     def _split_terms(self, latex_str: str)-> List:
         s = latex_str.replace(' ', '')
         terms = []
