@@ -7,6 +7,34 @@ class LatexParser:
         self._expression = latex_input.replace(" ","")
 
 
+    def dif_eq(self):
+        index = self._expression.find("=")
+        left_side = self._expression[:index]
+        right_side = self._expression[index+1:]
+        if left_side.find("dx") != -1:
+            left_var = 'x'
+            right_var = 'y'
+            left_side = left_side.replace("dx","")
+            right_side = right_side.replace("dy","")
+            left_int = LatexParser("\\int"+left_side+ " \, dx").parse()
+            right_int = LatexParser("\\int"+right_side+" \, dy").parse()
+        else:
+            left_var = 'y'
+            right_var = 'x'
+            left_side = left_side.replace("dy","")
+            right_side = right_side.replace("dx","")
+            left_int = LatexParser("\\int"+left_side+ " \, dy").parse()
+            right_int = LatexParser("\\int"+right_side+" \, dx").parse()
+
+        return {
+            'type': 'de',
+            'left_function': left_int,
+            'left_var': left_var,
+            'right_function': right_int,
+            'right_var': right_var
+        }
+
+
     def derivative_parser(self) -> Dict[str, Union[str, int]]:
         numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("dx")-2]
         denominator = self._expression[self._expression.rfind("dx") : self._expression.rfind("}")]
@@ -92,6 +120,10 @@ class LatexParser:
                                 Dict[str, Union[str, float]],
                                 Dict[str, Union[str, Matrix]]]]:
         
+        if self._expression.find("=") != -1:
+            return self.dif_eq()
+        
+
         function = re.findall(r'\\[a-zA-Z]+|\\.', self._expression)
         if function[0] == "\\frac":
             return self.derivative_parser()
