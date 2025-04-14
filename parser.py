@@ -12,15 +12,11 @@ class LatexParser:
         left_side = self._expression[:index]
         right_side = self._expression[index+1:]
         if left_side.find("dx") != -1:
-            left_var = 'x'
-            right_var = 'y'
             left_side = left_side.replace("dx","")
             right_side = right_side.replace("dy","")
             left_int = LatexParser("\\int"+left_side+ " \, dx").parse()
             right_int = LatexParser("\\int"+right_side+" \, dy").parse()
         else:
-            left_var = 'y'
-            right_var = 'x'
             left_side = left_side.replace("dy","")
             right_side = right_side.replace("dx","")
             left_int = LatexParser("\\int"+left_side+ " \, dy").parse()
@@ -29,9 +25,7 @@ class LatexParser:
         return {
             'type': 'de',
             'left_function': left_int,
-            'left_var': left_var,
             'right_function': right_int,
-            'right_var': right_var
         }
 
 

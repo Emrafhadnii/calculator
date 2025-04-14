@@ -443,6 +443,13 @@ class Calculator:
         return primary+"c" if lower is None or upper is None else value
 
 
+    def calculate_de(self):
+        left_int = Calculator(self.parsed_input['left_function']).calculate_integral()
+        right_int = Calculator(self.parsed_input['right_function']).calculate_integral()
+
+        return left_int + " = " + right_int
+
+
     def matrix_calculations(self) -> Union[Matrix,float]:
         matrix1 = Matrix(self.parsed_input['first'])
         matrix2 = Matrix(self.parsed_input['second'])
