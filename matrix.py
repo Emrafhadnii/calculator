@@ -105,7 +105,7 @@ class Matrix:
         return Matrix(result)
 
     def __rmul__(self,other):
-        return self.__mul__()
+        return self.__mul__(other)
 
     def transpose(self):
         result = [
@@ -172,7 +172,10 @@ class Matrix:
 
         return inverse_matrix
 
-a1 = Matrix([[1,0,3],
-             [5,-3,5],
-             [4,7,9]])
-print(a1.inverse())
+a1 = Matrix([[2,2,3],
+            [5,-1,6]])
+a2 = Matrix([[2,3],
+             [3,7],
+             [2,5]])
+
+print(a1*a2)
