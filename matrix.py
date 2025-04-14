@@ -104,6 +104,9 @@ class Matrix:
 
         return Matrix(result)
 
+    def __rmul__(self,other):
+        return self.__mul__()
+
     def transpose(self):
         result = [
             [self._matrix[i][j] for i in range(self._rows)] for j in range(self._cols)
@@ -142,7 +145,6 @@ class Matrix:
         cofactor_matrix = []
         cof_row = []
         while i<self._rows:
-
             minor = [
                 [self._matrix[row][col] for col in range(self._cols) if col != j]for row in range(self._rows) if row != i
             ]
@@ -157,7 +159,6 @@ class Matrix:
                 i+=1
         
         return Matrix(cofactor_matrix)
-
 
     def inverse(self):
         if self.issingular():
