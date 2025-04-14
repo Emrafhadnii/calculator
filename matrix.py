@@ -74,7 +74,7 @@ class Matrix:
     def __mul__(self,other):
         if isinstance(other, (int, float)):
             result = [
-                [other * elem for elem in row] for row in self._matrix
+                [round(other * elem, 4) for elem in row] for row in self._matrix
             ]
             return Matrix(result)
 
@@ -98,24 +98,6 @@ class Matrix:
                     row_result = []
                     k = 0
                     i += 1
-            # result = np.reshape(result, (self._rows,other._cols)).tolist()
-            
-            
-            
-            # i = 0
-            # while i < self._rows:
-            #     row_result = []
-            #     k = 0
-            #     while k < other._cols:
-            #         temp_res = 0
-            #         j = 0
-            #         while j < self._cols:
-            #             temp_res += self._matrix[i][j] * other._matrix[j][k]
-            #             j += 1
-            #         row_result.append(temp_res)
-            #         k += 1
-            #     result.append(row_result)
-            #     i += 1
 
         else:
             raise TypeError("Unsupported operand type")
@@ -155,16 +137,41 @@ class Matrix:
         else:
             return False
 
+    def cofactor_matrix(self):
+        i,j = 0,0
+        cofactor_matrix = []
+        cof_row = []
+        while i<self._rows:
+
+            minor = [
+                [self._matrix[row][col] for col in range(self._cols) if col != j]for row in range(self._rows) if row != i
+            ]
+            det = Matrix(minor).det()
+            cof_value = (-1) ** (i + j) * det
+            cof_row.append(cof_value)
+            j+=1
+            if j == self._cols:
+                cofactor_matrix.append(cof_row)
+                cof_row = []
+                j = 0
+                i+=1
+        
+        return Matrix(cofactor_matrix)
+
+
     def inverse(self):
-        newmatrix = []
-        if(self.issingular()):
+        if self.issingular():
             raise ValueError("this matrix has not inverse!")
         else:
-            det = self.det()
-            for i in range(self._rows):
-                tmplist = []
-                for j in range(self._cols):
-                    tmplist.append(1/det * self._matrix[i][j])
-                newmatrix.append(tmplist)
-        return Matrix(newmatrix)
-    
+            det = self.det()    
+            cofactor = self.cofactor_matrix()
+            adjugate = cofactor.transpose()
+            
+            inverse_matrix = adjugate * (1 / det)
+
+        return inverse_matrix
+
+a1 = Matrix([[1,0,3],
+             [5,-3,5],
+             [4,7,9]])
+print(a1.inverse())
