@@ -6,7 +6,7 @@ from typing import List,Optional,Tuple,Union
 class Calculator:
     def __init__(self, parsed_input: str):
         self.parsed_input = parsed_input
-        self.type = parsed_input.get('type')
+        self.type = self.parsed_input['type']
     
 
     def result(self) -> Optional[Union[str, float, Matrix]]:
@@ -445,7 +445,7 @@ class Calculator:
         return primary+"c" if lower is None or upper is None else value
 
 
-    def calculate_de(self):
+    def calculate_de(self) -> str:
         left_int = Calculator(self.parsed_input['left_function']).calculate_integral()
         right_int = Calculator(self.parsed_input['right_function']).calculate_integral()
 
@@ -475,15 +475,15 @@ class Calculator:
         return result
     
 
-while True:
-    user_input = str(input("Enter LaTeX expression: "))
-    if user_input == "exit":
-        break
-    latex_input = LatexParser(user_input)
-    parsed = latex_input.parse()
-    calc = Calculator(parsed)
-    result = calc.result()
-    print(f"type: {parsed['type']} \nresult: {result}")
+# while True:
+#     user_input = str(input("Enter LaTeX expression: "))
+#     if user_input == "exit":
+#         break
+#     latex_input = LatexParser(user_input)
+#     parsed = latex_input.parse()
+#     calc = Calculator(parsed)
+#     result = calc.result()
+#     print(f"type: {parsed['type']} \nresult: {result}")
 
 """
 sample inputs:

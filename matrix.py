@@ -172,10 +172,10 @@ class Matrix:
 
         return inverse_matrix
 
-a1 = Matrix([[2,2,3],
-            [5,-1,6]])
-a2 = Matrix([[2,3],
-             [3,7],
-             [2,5]])
+# a1 = Matrix([[2,2,3],
+#             [5,-1,6]])
+# a2 = Matrix([[2,3],
+#              [3,7],
+#              [2,5]])
 
-print(a1*a2)
+# print(a1*a2)
