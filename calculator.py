@@ -16,6 +16,8 @@ class Calculator:
             return self.calculate_integral()
         elif self.type == 'matrix operation':
             return self.matrix_calculations()
+        elif self.type == 'de':
+            return self.calculate_de()
         return None
 
 
@@ -447,7 +449,7 @@ class Calculator:
         left_int = Calculator(self.parsed_input['left_function']).calculate_integral()
         right_int = Calculator(self.parsed_input['right_function']).calculate_integral()
 
-        return left_int + " = " + right_int
+        return left_int + " = " + right_int.replace("+c","")
 
 
     def matrix_calculations(self) -> Union[Matrix,float]:
@@ -491,4 +493,5 @@ sample inputs:
 4.\frac{d(e^{x^2-x})}{dx}
 5.\int_5^10(\log(y)) \, dy
 6.\frac{d(2y*3y)}{dy}
+7.(3x)dx=(3y)dy
 """
