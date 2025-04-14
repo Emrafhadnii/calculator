@@ -482,6 +482,6 @@ sample inputs:
 2.\frac{d(12x^2-2x+1)}{dx}
 3.\int(e^{2x} + 1) \, dx
 4.\frac{d(e^{x^2-x})}{dx}
-5.\int_5^10(\log(x)) \, dx
-6.\frac{d(2x*3x)}{dx}
+5.\int_5^10(\log(y)) \, dy
+6.\frac{d(2y*3y)}{dy}
 """

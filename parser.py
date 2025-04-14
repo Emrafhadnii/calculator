@@ -36,8 +36,8 @@ class LatexParser:
 
 
     def derivative_parser(self) -> Dict[str, Union[str, int]]:
-        numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("dx")-2]
-        denominator = self._expression[self._expression.rfind("dx") : self._expression.rfind("}")]
+        numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("d")-2]
+        denominator = self._expression[self._expression.rfind(f"d") : self._expression.rfind("}")]
         var = denominator[1]
 
         index = numerator.find("d^")
@@ -123,7 +123,6 @@ class LatexParser:
         if self._expression.find("=") != -1:
             return self.dif_eq()
         
-
         function = re.findall(r'\\[a-zA-Z]+|\\.', self._expression)
         if function[0] == "\\frac":
             return self.derivative_parser()
