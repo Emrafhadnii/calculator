@@ -22,46 +22,48 @@ class Calculator:
 
 
     def _split_terms(self, latex_str: str)-> List:
-        s = latex_str.replace(' ', '')
-        terms = []
-        current_term = []
-        brace_level = 0
-        
-        i = 0
-        n = len(s)
-        while i < n:
-            char = s[i]
+        try:
+            s = latex_str.replace(' ', '')
+            terms = []
+            current_term = []
+            brace_level = 0
             
-            if char == '\\':
-                command_end = i + 1
-                while command_end < n and s[command_end].isalpha():
-                    command_end += 1
-                command = s[i:command_end]
-                current_term.append(command)
-                i = command_end
-                continue
-            
-            if char == '{' or char == '(':
-                brace_level += 1
-            elif char == '}' or char == ')':
-                brace_level -= 1
-            
-            if char in "+-*" and brace_level == 0:
-                if current_term:
-                    if current_term[0] == "(" and current_term[-1] == (')'):
-                        current_term = current_term[1:-1]
-                    terms.append(''.join(current_term))
-                    current_term = []
-                if char == '-':
+            i = 0
+            n = len(s)
+            while i < n:
+                char = s[i]
+                
+                if char == '\\':
+                    command_end = i + 1
+                    while command_end < n and s[command_end].isalpha():
+                        command_end += 1
+                    command = s[i:command_end]
+                    current_term.append(command)
+                    i = command_end
+                    continue
+                
+                if char == '{' or char == '(':
+                    brace_level += 1
+                elif char == '}' or char == ')':
+                    brace_level -= 1
+                
+                if char in "+-*" and brace_level == 0:
+                    if current_term:
+                        if current_term[0] == "(" and current_term[-1] == (')'):
+                            current_term = current_term[1:-1]
+                        terms.append(''.join(current_term))
+                        current_term = []
+                    if char == '-':
+                        current_term.append(char)
+                else:
                     current_term.append(char)
-            else:
-                current_term.append(char)
-            i += 1
-        if current_term:
-            if current_term[0] == "(" and current_term[-1] == (')'):
-                current_term = current_term[1:-1]
-            terms.append(''.join(current_term))
-        
+                i += 1
+            if current_term:
+                if current_term[0] == "(" and current_term[-1] == (')'):
+                    current_term = current_term[1:-1]
+                terms.append(''.join(current_term))
+        except:
+            raise ValueError("Invalid expression")
         return terms
 
 
@@ -297,56 +299,63 @@ class Calculator:
 
 
     def _exponential_derivative(self, term: str) -> str:
-        index = term.find("^")
-        if index != -1:
-            power = term[index+1:]
-            var = self.parsed_input['variable']
-            if power[0] == "{" and power[-1] == "}":
-                power = power[1:-1]
-            obj = Calculator({
-                        'type': 'derivative',
-                        'function': power,
-                        'variable': var,
-                        'order': 1
-                    })
-            temp_der = obj.calculate_derivative()
-            temp_der = "" if (temp_der == "" or temp_der =="0") else "("+temp_der+")*"
-            base = term[:term.find("e")]
-            new_power = power
-            if base == "" or base == "1":
-                new_base = ""
-            else:
-                new_base = f"(({base}))"
+        try:
+            index = term.find("^")
+            if index != -1:
+                power = term[index+1:]
+                var = self.parsed_input['variable']
+                if power[0] == "{" and power[-1] == "}":
+                    power = power[1:-1]
+                obj = Calculator({
+                            'type': 'derivative',
+                            'function': power,
+                            'variable': var,
+                            'order': 1
+                        })
+                temp_der = obj.calculate_derivative()
+                temp_der = "" if (temp_der == "" or temp_der =="0") else "("+temp_der+")*"
+                base = term[:term.find("e")]
+                new_power = power
+                if base == "" or base == "1":
+                    new_base = ""
+                else:
+                    new_base = f"(({base}))"
 
 
-            derived = f"{temp_der}{new_base}e^{new_power}"
-            return derived
+                derived = f"{temp_der}{new_base}e^{new_power}"
+        except:
+            raise ValueError("Invalid expression")
+            
+        return derived
 
 
     def _exponential_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
-        index = term.find("^")
-        power = term[index+1 :].replace("{","",1).replace("}","",1)
-        var = self.parsed_input['variable']
-        value_term = 0
-        primary_term = ""
         try:
-            base = float(term[:term.find("e")])
+            index = term.find("^")
+            power = term[index+1 :].replace("{","",1).replace("}","",1)
+            var = self.parsed_input['variable']
+            value_term = 0
+            primary_term = ""
+            try:
+                base = float(term[:term.find("e")])
+            except:
+                base = 1
+            obj = Calculator({
+                'type': 'derivative',
+                'function': power,
+                'variable': var,
+                'order': 1
+            })
+            power_der = obj.calculate_derivative()
+            new_base = 1/float(power_der) * base
+            new_power = power
+            power_value = float(power[:power.find(var)])
+            if lower is None or upper is None:
+                primary_term = f"({new_base})*e^({new_power})"
+            else:
+                value_term = abs((new_base*math.e**(upper*power_value)) - (new_base*math.e**(lower*power_value)))
         except:
-            base = 1
-        obj = Calculator({
-            'type': 'derivative',
-            'function': power,
-            'variable': var,
-            'order': 1
-        })
-        power_der = obj.calculate_derivative()
-        new_base = 1/float(power_der) * base
-        new_power = power
-        power_value = float(power[:power.find(var)])
-        if lower is None or upper is None:
-            primary_term = f"({new_base})*e^({new_power})"
-        else:
-            value_term = abs((new_base*math.e**(upper*power_value)) - (new_base*math.e**(lower*power_value)))
+            raise ValueError("Invalid expression")
 
         return value_term,primary_term,new_base,new_power
 
@@ -358,44 +367,47 @@ class Calculator:
         terms = self._split_terms(function)
         var = self.parsed_input['variable']
         for term in terms:
-            term = term.replace(f"-{var}",f"-1{var}")
-            if function.find(f"{term}*") != -1 or function.find(f"({term})*") != -1:
-                second_term = terms[terms.index(term)+1]
+            try:
+                term = term.replace(f"-{var}",f"-1{var}")
+                if function.find(f"{term}*") != -1 or function.find(f"({term})*") != -1:
+                    second_term = terms[terms.index(term)+1]
 
-                first = Calculator({
-                    'type': 'derivative',
-                    'function': term,
-                    'variable': var,
-                    'order': 1
-                })
-                second = Calculator({
-                    'type': 'derivative',
-                    'function': second_term,
-                    'variable': var,
-                    'order': 1
-                })
-                terms.remove(second_term)
-                derived_term = "(" + first.calculate_derivative() + f"*({second_term}))+"
-                derived_term += "(" + second.calculate_derivative() + f"*({term}))"
+                    first = Calculator({
+                        'type': 'derivative',
+                        'function': term,
+                        'variable': var,
+                        'order': 1
+                    })
+                    second = Calculator({
+                        'type': 'derivative',
+                        'function': second_term,
+                        'variable': var,
+                        'order': 1
+                    })
+                    terms.remove(second_term)
+                    derived_term = "(" + first.calculate_derivative() + f"*({second_term}))+"
+                    derived_term += "(" + second.calculate_derivative() + f"*({term}))"
 
-            else:
-                if term.find("e^") != -1 and var != "e":
-                    derived_term = self._exponential_derivative(term)
-
-                elif term.find("\\") != -1:
-                    var_index = term.find(var)
-                    if var_index == -1:
-                        new_power = 0
-                        new_base = 0
-                    else:
-                        derived_term = self._trigonometric_derivative(term)
                 else:
-                    derived_term = self._polynomial_derivative(term)
-                    
-            if derived_term != "":
-                derived += derived_term + "+"
-            else:
-                derived += derived_term     
+                    if term.find("e^") != -1 and var != "e":
+                        derived_term = self._exponential_derivative(term)
+
+                    elif term.find("\\") != -1:
+                        var_index = term.find(var)
+                        if var_index == -1:
+                            new_power = 0
+                            new_base = 0
+                        else:
+                            derived_term = self._trigonometric_derivative(term)
+                    else:
+                        derived_term = self._polynomial_derivative(term)
+                        
+                if derived_term != "":
+                    derived += derived_term + "+"
+                else:
+                    derived += derived_term     
+            except:
+                raise ValueError("Invalid expression")
 
         derived = derived.replace("+-","-")
         if derived != "":
@@ -416,39 +428,43 @@ class Calculator:
         primary = ""
         value = 0
         for term in terms:
-            primary_term = ""
-            value_term = 0
-            if term.find(var) == -1:
-                term = f"{term}{var}^0"
-            
-            term = term.replace(f"-{var}",f"-1{var}")
-
-            if term.find("e^") != -1 and var != "e":
-                value_term,primary_term,new_base,new_power = self._exponential_integral(term,lower,upper)
-            elif term.find("\\") != -1:
-                value_term,primary_term,new_base,new_power = self._trigonometric_integral(term,lower,upper)
-            else:
-                value_term,primary_term,new_base,new_power = self._polynominal_integral(term,lower,upper)
+            try:
+                primary_term = ""
+                value_term = 0
+                if term.find(var) == -1:
+                    term = f"{term}{var}^0"
                 
+                term = term.replace(f"-{var}",f"-1{var}")
 
-            if new_base == 1:
-                primary_term = primary_term.replace(f"({new_base})*","",1)
-            if new_power == 1:
-                primary_term = primary_term.replace(f"^({new_power})","",1)
-            if new_power == 0:
-                primary_term = primary_term.replace(f"*{var}^({new_power})","",1)        
+                if term.find("e^") != -1 and var != "e":
+                    value_term,primary_term,new_base,new_power = self._exponential_integral(term,lower,upper)
+                elif term.find("\\") != -1:
+                    value_term,primary_term,new_base,new_power = self._trigonometric_integral(term,lower,upper)
+                else:
+                    value_term,primary_term,new_base,new_power = self._polynominal_integral(term,lower,upper)
+                    
 
-            value += value_term
-            primary += primary_term + "+"
-            primary = primary.replace("+-","-")
+                if new_base == 1:
+                    primary_term = primary_term.replace(f"({new_base})*","",1)
+                if new_power == 1:
+                    primary_term = primary_term.replace(f"^({new_power})","",1)
+                if new_power == 0:
+                    primary_term = primary_term.replace(f"*{var}^({new_power})","",1)        
 
-        return primary+"c" if lower is None or upper is None else value
+                value += value_term
+                primary += primary_term + "+"
+                primary = primary.replace("+-","-")
+            except:
+                raise ValueError("Invalid expression")
+        return primary+"c" if lower is None or upper is None else round(value,2)
 
 
     def calculate_de(self) -> str:
-        left_int = Calculator(self.parsed_input['left_function']).calculate_integral()
-        right_int = Calculator(self.parsed_input['right_function']).calculate_integral()
-
+        try:
+            left_int = Calculator(self.parsed_input['left_function']).calculate_integral()
+            right_int = Calculator(self.parsed_input['right_function']).calculate_integral()
+        except:
+            raise ValueError("Invalid expression")
         return left_int + " = " + right_int.replace("+c","")
 
 
