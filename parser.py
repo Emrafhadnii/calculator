@@ -16,12 +16,13 @@ class LatexParser:
             right_side = right_side.replace("dy","")
             left_int = LatexParser("\\int"+left_side+ " \, dx").parse()
             right_int = LatexParser("\\int"+right_side+" \, dy").parse()
-        else:
+        elif left_side.find("dy") != -1:
             left_side = left_side.replace("dy","")
             right_side = right_side.replace("dx","")
             left_int = LatexParser("\\int"+left_side+ " \, dy").parse()
             right_int = LatexParser("\\int"+right_side+" \, dx").parse()
-
+        else:
+            raise ValueError("Invalid input")
         return {
             'type': 'de',
             'left_function': left_int,
@@ -40,10 +41,11 @@ class LatexParser:
                 order = int(numerator[index+3 : numerator.find("}")])
             else:
                 order = int(numerator[index+2 : numerator.find("(")])
-        else:
+        elif numerator.find("d") != -1:
             order = 1
+        else:
+            raise ValueError("Invalid input")
         function = numerator[numerator.find("(")+1 : numerator.rfind(")")]
-
         return{
             'type': 'derivative',
             'function': function,
@@ -56,16 +58,19 @@ class LatexParser:
         self._expression = self._expression.replace(" ","")
         if self._expression[self._expression.find("int") + 3] == "_":
             lindex = self._expression.find("_")
-            if self._expression[lindex+1] != "{":
-                lower = float(self._expression[lindex+1 : self._expression.find("^")])
-            else:
-                lower = float(self._expression[lindex+2 : self._expression.find("}")])
-            
-            uindex = self._expression.find("^")
-            if self._expression[uindex+1] != "{":
-                upper = float(self._expression[uindex+1 : self._expression.find("(")])
-            else:
-                upper = float(self._expression[uindex+2 : self._expression.find("(")-1])
+            try:
+                if self._expression[lindex+1] != "{":
+                    lower = float(self._expression[lindex+1 : self._expression.find("^")])
+                else:
+                    lower = float(self._expression[lindex+2 : self._expression.find("}")])
+                
+                uindex = self._expression.find("^")
+                if self._expression[uindex+1] != "{":
+                    upper = float(self._expression[uindex+1 : self._expression.find("(")])
+                else:
+                    upper = float(self._expression[uindex+2 : self._expression.find("(")-1])
+            except:
+                raise ValueError("Invalid input")
         else:
             lower,upper = None,None
 
@@ -92,14 +97,16 @@ class LatexParser:
         if self._expression.count("\\begin") == 1:
             matrix2 = None
             operator = self._expression[:self._expression.find("(")].replace("\\","")
-        else:
+        elif self._expression.count("\\begin") == 2:
             start = self._expression.find("}",self._expression.rfind("\\begin"))
             end = self._expression.rfind("\\end")
             matrix_bound = self._expression[start+1 : end]
             matrix2 = [list(map(int, line.split("&"))) for line in matrix_bound.split("\\")]
 
             operator = self._expression[self._expression.rfind("\\begin")-1]
-
+        else:
+            raise ValueError("Invalid input")
+        
         return{
             'type': 'matrix operation',
             'first': Matrix(matrix1),
