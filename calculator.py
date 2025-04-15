@@ -68,232 +68,246 @@ class Calculator:
 
 
     def _polynomial_derivative(self, term: str) -> str:
-        var = self.parsed_input['variable']
-        if term.find(var) == -1:
-            term += "^0"
-            index = term.find("^")
-        else:
-            index = term.find("^")
-            if index != -1:
-                pass           
-            else:
-                term += "^1"
+        try:
+            var = self.parsed_input['variable']
+            if term.find(var) == -1:
+                term += "^0"
                 index = term.find("^")
-        
-        power = float(term[index+1:].replace("{","").replace("}",""))
-        if power == 0:
-            new_power = 0
-            new_base = 0
-        else:
-            new_power = float(power)-1
-            index = term.find(var)
-            if term[:index] == "":
-                term = "1" + term
-                index += 1
-            new_base = float(term[:index])*power
-        new_base = "" if new_base == 1 else new_base
-        new_power = "" if new_power == 1 else new_power
-        
-        if new_base == 0:
-            return ""
-        if new_power == 0:
-            derived = f"{new_base}"
-        else:
-            if new_power != "":
-                derived = f"{new_base}x^{new_power}"
             else:
-                derived = derived = f"{new_base}x"
+                index = term.find("^")
+                if index != -1:
+                    pass           
+                else:
+                    term += "^1"
+                    index = term.find("^")
+            
+            power = float(term[index+1:].replace("{","").replace("}",""))
+            if power == 0:
+                new_power = 0
+                new_base = 0
+            else:
+                new_power = float(power)-1
+                index = term.find(var)
+                if term[:index] == "":
+                    term = "1" + term
+                    index += 1
+                new_base = float(term[:index])*power
+            new_base = "" if new_base == 1 else new_base
+            new_power = "" if new_power == 1 else new_power
+            
+            if new_base == 0:
+                return ""
+            if new_power == 0:
+                derived = f"{new_base}"
+            else:
+                if new_power != "":
+                    derived = f"{new_base}x^{new_power}"
+                else:
+                    derived = derived = f"{new_base}x"
+        except:
+            raise ValueError("Invalid expression")
 
         return derived
 
 
     def _polynominal_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
-        index = term.find("^")
-        var = self.parsed_input['variable']
-        value_term = 0
-        primary_term = ""
-        if index == -1:
-            term += "^1"
+        try:
             index = term.find("^")
-        else:
-            pass
+            var = self.parsed_input['variable']
+            value_term = 0
+            primary_term = ""
+            if index == -1:
+                term += "^1"
+                index = term.find("^")
+            else:
+                pass
 
-        if term[0] == var:
-            term = "1" + term
-            index += 1
-        power = float(term[index+1:])
-        base = float(term[:term.find(var)])
-        new_power = power+1
-        new_base = base/new_power
+            if term[0] == var:
+                term = "1" + term
+                index += 1
+            power = float(term[index+1:])
+            base = float(term[:term.find(var)])
+            new_power = power+1
+            new_base = base/new_power
 
-        if lower is None or upper is None:
-            primary_term = f"({new_base})*{var}^({new_power})"
+            if lower is None or upper is None:
+                primary_term = f"({new_base})*{var}^({new_power})"
 
-        else:
-            value_term = (new_base*upper**new_power) - (new_base*lower**new_power)
+            else:
+                value_term = (new_base*upper**new_power) - (new_base*lower**new_power)
+        except:
+            raise ValueError("Invalid expression")
 
         return value_term,primary_term,new_base,new_power
 
 
     def _trigonometric_derivative(self, term: str) -> str:
-        exp = term.find("(")
-        index = term.find("^") 
-        var = self.parsed_input['variable']
-        derived_term = ""
+        try:
+            exp = term.find("(")
+            index = term.find("^") 
+            var = self.parsed_input['variable']
+            derived_term = ""
 
-        if index == -1 or index > exp:
-            term = term[:exp] + "^1" + term[exp:]
-            index = exp
-            exp += 2
+            if index == -1 or index > exp:
+                term = term[:exp] + "^1" + term[exp:]
+                index = exp
+                exp += 2
 
-        index = term.find("^")
-        start = term.find("{")
-        end = term.find("}")
-        if start != -1 and start < exp:
-            power = float(term[start+1 : end])
-        else:
-            power = float(term[index+1 : exp])
-        if power == 0:
-            new_power = 0
-        elif power == 1:
-            new_power = 1
-        else:
-            new_power = power-1
+            index = term.find("^")
+            start = term.find("{")
+            end = term.find("}")
+            if start != -1 and start < exp:
+                power = float(term[start+1 : end])
+            else:
+                power = float(term[index+1 : exp])
+            if power == 0:
+                new_power = 0
+            elif power == 1:
+                new_power = 1
+            else:
+                new_power = power-1
 
-        if term[:term.find("\\")] == "":
-            term = "1" + term
-        base = float(term[:term.find("\\")])
-        new_base = base*power
+            if term[:term.find("\\")] == "":
+                term = "1" + term
+            base = float(term[:term.find("\\")])
+            new_base = base*power
 
-        new_base = "" if new_base == 1 else new_base
-        new_power = "" if new_power == 1 else new_power
+            new_base = "" if new_base == 1 else new_base
+            new_power = "" if new_power == 1 else new_power
 
-        obj = Calculator({
-            'type': 'derivative',
-            'function': term[term.find("(")+1 : term.rfind(")")],
-            'variable': var,
-            'order': 1
-        })
-        parenthesis_derived = obj.calculate_derivative()
-        
-        parenthesis_derived = "" if parenthesis_derived == "" else "" if parenthesis_derived == "0" else parenthesis_derived+")*"
-
-        if term.find("\\sin") != -1:
-            temp_der = ""
-            if power > 1:
-                temp_der = f"*sin^{new_power}{term[term.find("(") : term.find(")")]})"
-
-            if new_power == "":
-                temp_der = temp_der.replace("^","",1)
-
-            derived_term = f"({parenthesis_derived}({new_base})*cos{term[term.find("(") : term.find(")")]})" + temp_der
-
-        elif term.find("\\cos") != -1:
-            temp_der = ""
-            if power > 1:
-                temp_der = f"*cos^{new_power}{term[term.find("(") : term.find(")")]})"
-
-            if new_power == "":
-                temp_der = temp_der.replace("^","",1)
-
-            derived_term = f"-({parenthesis_derived}({new_base})*sin{term[term.find("(") : term.find(")")]})" + temp_der
-
-        elif term.find("\\tan") != -1:
-            temp_der = ""
-            if power > 1:
-                temp_der = f"*tan^{new_power}{term[term.find("(") : term.find(")")]})"
+            obj = Calculator({
+                'type': 'derivative',
+                'function': term[term.find("(")+1 : term.rfind(")")],
+                'variable': var,
+                'order': 1
+            })
+            parenthesis_derived = obj.calculate_derivative()
             
-            if new_power == "":
-                temp_der = temp_der.replace("^","",1)
+            parenthesis_derived = "" if parenthesis_derived == "" else "" if parenthesis_derived == "0" else parenthesis_derived+")*"
 
-            derived_term = f"({parenthesis_derived}({new_base})*(1+tan^2{term[term.find("(") : term.find(")")]}))" + temp_der
+            if term.find("\\sin") != -1:
+                temp_der = ""
+                if power > 1:
+                    temp_der = f"*sin^{new_power}{term[term.find("(") : term.find(")")]})"
 
-        elif term.find("\\cot") != -1:
-            temp_der = ""
-            if power > 1:
-                temp_der = f"cot^{new_power}{term[term.find("(") : term.find(")")]})"
-            
-            if new_power == "":
-                temp_der = temp_der.replace("^","",1)
+                if new_power == "":
+                    temp_der = temp_der.replace("^","",1)
 
-            derived_term = f"-({parenthesis_derived}({new_base})*(1+cot^2{term[term.find("(") : term.find(")")]}))" + temp_der
+                derived_term = f"({parenthesis_derived}({new_base})*cos{term[term.find("(") : term.find(")")]})" + temp_der
 
-        elif term.find("\\log") != -1:
-            under_line = term.find("_")
-            log_base = 10
-            if under_line != -1:
-                log_base = float(term[under_line+1 : term.find("^")])
+            elif term.find("\\cos") != -1:
+                temp_der = ""
+                if power > 1:
+                    temp_der = f"*cos^{new_power}{term[term.find("(") : term.find(")")]})"
 
-            parenthesis_derived = parenthesis_derived.replace("*","",1)
-            derived_term = f"({parenthesis_derived}/{term[term.find("(") : term.rfind(")")]})*ln({log_base})"
-            
+                if new_power == "":
+                    temp_der = temp_der.replace("^","",1)
 
-        elif term.find("\\ln") != -1:
-            parenthesis_derived = parenthesis_derived.replace("*","",1)
-            top = "1" if parenthesis_derived == "" else parenthesis_derived
-            derived_term = f"({top}/({term[term.find("(")+1 : term.rfind(")")]})"
+                derived_term = f"-({parenthesis_derived}({new_base})*sin{term[term.find("(") : term.find(")")]})" + temp_der
 
-        if parenthesis_derived == "":
-            derived_term = derived_term.replace("(","",1)
+            elif term.find("\\tan") != -1:
+                temp_der = ""
+                if power > 1:
+                    temp_der = f"*tan^{new_power}{term[term.find("(") : term.find(")")]})"
+                
+                if new_power == "":
+                    temp_der = temp_der.replace("^","",1)
+
+                derived_term = f"({parenthesis_derived}({new_base})*(1+tan^2{term[term.find("(") : term.find(")")]}))" + temp_der
+
+            elif term.find("\\cot") != -1:
+                temp_der = ""
+                if power > 1:
+                    temp_der = f"cot^{new_power}{term[term.find("(") : term.find(")")]})"
+                
+                if new_power == "":
+                    temp_der = temp_der.replace("^","",1)
+
+                derived_term = f"-({parenthesis_derived}({new_base})*(1+cot^2{term[term.find("(") : term.find(")")]}))" + temp_der
+
+            elif term.find("\\log") != -1:
+                under_line = term.find("_")
+                log_base = 10
+                if under_line != -1:
+                    log_base = float(term[under_line+1 : term.find("^")])
+
+                parenthesis_derived = parenthesis_derived.replace("*","",1)
+                derived_term = f"({parenthesis_derived}/{term[term.find("(") : term.rfind(")")]})*ln({log_base})"
+                
+
+            elif term.find("\\ln") != -1:
+                parenthesis_derived = parenthesis_derived.replace("*","",1)
+                top = "1" if parenthesis_derived == "" else parenthesis_derived
+                derived_term = f"({top}/({term[term.find("(")+1 : term.rfind(")")]})"
+
+            if parenthesis_derived == "":
+                derived_term = derived_term.replace("(","",1)
+        except:
+            raise ValueError("Invalid expression")
 
         return derived_term.replace("*()","").replace("()*","")
 
 
     def _trigonometric_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
-        var = self.parsed_input['variable']
-        value_term = 0
-        primary_term = ""
-        if term[0] == "\\":
-            term = "1" + term
-        base = float(term[:term.find("\\")])
-        power = 1
-        
-        new_power = power
-        new_base = base
-
-        if term.find("\\sin") != -1:
-            if lower is None or upper is None:
-                primary_term = f"({-new_base})*(cos({var})"
-            else:
-                value_term = new_base*abs((math.cos(upper)) - (math.cos(lower)))
-
-        elif term.find("\\cos") != -1:
-            if lower is None or upper is None:
-                primary_term = f"({new_base})*sin({var})"
-            else:
-                value_term = new_base*abs((math.sin(upper)) - (math.sin(lower)))
-
-        elif term.find("\\tan") != -1:
-            if lower is None or upper is None:
-                primary_term = f"({-new_base})*ln|cos({var})|"
-            else:
-                value_term = new_base*abs((math.log(math.cos(upper),math.e)) - (math.log(math.cos(lower),math.e)))
-
-        elif term.find("\\cot") != -1:
-            if lower is None or upper is None:
-                primary_term = f"({new_base})*ln|sin({var})|"
-            else:
-                value_term = new_base*abs((math.log(math.sin(upper),math.e)) - (math.log(math.sin(lower),math.e)))
-
-        elif term.find("\\log") != -1:
-            under_line = term.find("_")
-            log_base = 10
-            if under_line != -1:
-                log_base = float(term[under_line+1 : term.find("^")])
-
-            if lower is None or upper is None:
-                primary_term = f"({new_base})*({var}*(log_{log_base}({var})-(1/ln({log_base}))))"
-            else:
-                
-                value_term = new_base*abs((upper*(math.log(upper,log_base)-(1/math.log(log_base,math.e)))) 
-                                          - 
-                                          (lower*(math.log(lower,log_base)-(1/math.log(log_base,math.e)))))
+        try:
+            var = self.parsed_input['variable']
+            if f"{var}^" in term:
+                raise ValueError("Invalid expression")
+            value_term = 0
+            primary_term = ""
+            if term[0] == "\\":
+                term = "1" + term
+            base = float(term[:term.find("\\")])
+            power = 1
             
-        elif term.find("\\ln") != -1:
-            if lower is None or upper is None:
-                primary_term = f"({new_base})*({var}*(ln({var})-1))"
-            else:
-                value_term = new_base*abs((upper(math.log(upper,math.e)-1)) - (lower(math.log(lower,math.e)-1)))
+            new_power = power
+            new_base = base
+
+            if term.find("\\sin") != -1:
+                if lower is None or upper is None:
+                    primary_term = f"({-new_base})*cos({var})"
+                else:
+                    value_term = new_base*abs((math.cos(upper)) - (math.cos(lower)))
+
+            elif term.find("\\cos") != -1:
+                if lower is None or upper is None:
+                    primary_term = f"({new_base})*sin({var})"
+                else:
+                    value_term = new_base*abs((math.sin(upper)) - (math.sin(lower)))
+
+            elif term.find("\\tan") != -1:
+                if lower is None or upper is None:
+                    primary_term = f"({-new_base})*ln|cos({var})|"
+                else:
+                    value_term = new_base*abs((math.log(math.cos(upper),math.e)) - (math.log(math.cos(lower),math.e)))
+
+            elif term.find("\\cot") != -1:
+                if lower is None or upper is None:
+                    primary_term = f"({new_base})*ln|sin({var})|"
+                else:
+                    value_term = new_base*abs((math.log(math.sin(upper),math.e)) - (math.log(math.sin(lower),math.e)))
+
+            elif term.find("\\log") != -1:
+                under_line = term.find("_")
+                log_base = 10
+                if under_line != -1:
+                    log_base = float(term[under_line+1 : term.find("^")])
+
+                if lower is None or upper is None:
+                    primary_term = f"({new_base})*({var}*(log_{log_base}({var})-(1/ln({log_base}))))"
+                else:
+                    
+                    value_term = new_base*abs((upper*(math.log(upper,log_base)-(1/math.log(log_base,math.e)))) 
+                                            - 
+                                            (lower*(math.log(lower,log_base)-(1/math.log(log_base,math.e)))))
+                
+            elif term.find("\\ln") != -1:
+                if lower is None or upper is None:
+                    primary_term = f"({new_base})*({var}*(ln({var})-1))"
+                else:
+                    value_term = new_base*abs((upper(math.log(upper,math.e)-1)) - (lower(math.log(lower,math.e)-1)))
+        except:
+            raise ValueError("Invalid expression")
 
         return value_term,primary_term,new_base,new_power
 
@@ -415,6 +429,8 @@ class Calculator:
                 derived = derived[:-1]
         if derived == "":
             return "0"
+        if derived == "+":
+            raise ValueError("unexpected function")
         return derived
 
 
@@ -456,15 +472,24 @@ class Calculator:
                 primary = primary.replace("+-","-")
             except:
                 raise ValueError("Invalid expression")
+        if primary == "+" and value == 0:
+            raise ValueError("unexpected function")
         return primary+"c" if lower is None or upper is None else round(value,2)
 
 
     def calculate_de(self) -> str:
         try:
+            if ('x' and 'y') in self.parsed_input['left_function']['function']:
+                raise ValueError("Invalid expression")
             left_int = Calculator(self.parsed_input['left_function']).calculate_integral()
+
+            if ('y' and 'x') in self.parsed_input['right_function']['function']:
+                raise ValueError("Invalid expression")
             right_int = Calculator(self.parsed_input['right_function']).calculate_integral()
+        
         except:
             raise ValueError("Invalid expression")
+        
         return left_int + " = " + right_int.replace("+c","")
 
 
@@ -510,4 +535,5 @@ sample inputs:
 5.\int_5^10(\log(y)) \, dy
 6.\frac{d(2y*3y)}{dy}
 7.(3x)dx=(3y)dy
+\frac(log(3x) + y^2))
 """

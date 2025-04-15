@@ -8,20 +8,23 @@ class LatexParser:
 
 
     def dif_eq(self):
-        index = self._expression.find("=")
-        left_side = self._expression[:index]
-        right_side = self._expression[index+1:]
-        if left_side.find("dx") != -1:
-            left_side = left_side.replace("dx","")
-            right_side = right_side.replace("dy","")
-            left_int = LatexParser("\\int"+left_side+ " \, dx").parse()
-            right_int = LatexParser("\\int"+right_side+" \, dy").parse()
-        elif left_side.find("dy") != -1:
-            left_side = left_side.replace("dy","")
-            right_side = right_side.replace("dx","")
-            left_int = LatexParser("\\int"+left_side+ " \, dy").parse()
-            right_int = LatexParser("\\int"+right_side+" \, dx").parse()
-        else:
+        try:
+            index = self._expression.find("=")
+            left_side = self._expression[:index]
+            right_side = self._expression[index+1:]
+            if left_side.find("dx") != -1:
+                left_side = left_side.replace("dx","")
+                right_side = right_side.replace("dy","")
+                left_int = LatexParser("\\int"+left_side+ " \, dx").parse()
+                right_int = LatexParser("\\int"+right_side+" \, dy").parse()
+            elif left_side.find("dy") != -1:
+                left_side = left_side.replace("dy","")
+                right_side = right_side.replace("dx","")
+                left_int = LatexParser("\\int"+left_side+ " \, dy").parse()
+                right_int = LatexParser("\\int"+right_side+" \, dx").parse()
+            else:
+                raise ValueError("Invalid input")
+        except:
             raise ValueError("Invalid input")
         return {
             'type': 'de',
@@ -31,21 +34,27 @@ class LatexParser:
 
 
     def derivative_parser(self) -> Dict[str, Union[str, int]]:
-        numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("d")-2]
-        denominator = self._expression[self._expression.rfind(f"d") : self._expression.rfind("}")]
-        var = denominator[1]
+        try:
+            numerator = self._expression[self._expression.find("{")+1 : self._expression.rfind("d")-2]
+            denominator = self._expression[self._expression.rfind(f"d") : self._expression.rfind("}")]
+            var = denominator[1]
 
-        index = numerator.find("d^")
-        if index != -1:
-            if numerator[index+2] == "{":
-                order = int(numerator[index+3 : numerator.find("}")])
+            index = numerator.find("d^")
+            if index != -1:
+                if numerator[index+2] == "{":
+                    order = int(numerator[index+3 : numerator.find("}")])
+                else:
+                    order = int(numerator[index+2 : numerator.find("(")])
+            elif numerator.find("d") != -1:
+                order = 1
             else:
-                order = int(numerator[index+2 : numerator.find("(")])
-        elif numerator.find("d") != -1:
-            order = 1
-        else:
+                raise ValueError("Invalid input")
+            function = numerator[numerator.find("(")+1 : numerator.rfind(")")]
+        except:
             raise ValueError("Invalid input")
-        function = numerator[numerator.find("(")+1 : numerator.rfind(")")]
+        if var not in function:
+            raise ValueError("Invalid dif")
+        
         return{
             'type': 'derivative',
             'function': function,
@@ -55,10 +64,10 @@ class LatexParser:
 
 
     def integral_parser(self) -> Dict[str, Union[str, float]]:
-        self._expression = self._expression.replace(" ","")
-        if self._expression[self._expression.find("int") + 3] == "_":
-            lindex = self._expression.find("_")
-            try:
+        try:
+            self._expression = self._expression.replace(" ","")
+            if self._expression[self._expression.find("int") + 3] == "_":
+                lindex = self._expression.find("_")
                 if self._expression[lindex+1] != "{":
                     lower = float(self._expression[lindex+1 : self._expression.find("^")])
                 else:
@@ -69,13 +78,16 @@ class LatexParser:
                     upper = float(self._expression[uindex+1 : self._expression.find("(")])
                 else:
                     upper = float(self._expression[uindex+2 : self._expression.find("(")-1])
-            except:
-                raise ValueError("Invalid input")
-        else:
-            lower,upper = None,None
+            else:
+                lower,upper = None,None
 
-        var = self._expression[self._expression.rfind("d")+1:]
-        function = self._expression[self._expression.find("(")+1 : self._expression.rfind(")")]
+            var = self._expression[self._expression.rfind("d")+1:]
+            function = self._expression[self._expression.find("(")+1 : self._expression.rfind(")")]
+        except:
+            raise ValueError("Invalid input")
+
+        if var not in function:
+            raise ValueError("Invalid dif")
 
         return {
             'type': 'integral',
@@ -132,3 +144,4 @@ class LatexParser:
         elif function[0] == "\\begin":
             return self.matrix_parser()
         return None
+    
