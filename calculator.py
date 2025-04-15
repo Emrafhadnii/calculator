@@ -526,6 +526,7 @@ class Calculator:
 #     result = calc.result()
 #     print(f"type: {parsed['type']} \nresult: {result}")
 
+
 """
 sample inputs:
 1.\frac{d(\log(3x^{12}+12x) + x^2)}{dx}
