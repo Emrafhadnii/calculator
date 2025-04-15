@@ -56,7 +56,6 @@ def test_de_calc(input, expected):
         assert result == expected
 
 
-
 @pytest.mark.parametrize("input,expected", [
     ("\\int(e^{2x} + 1) \\, dx","e^{2x}+1"),
     ("\\int_5^10(\\log(y)) \\, dy","\\log(y)"),
