@@ -14,12 +14,14 @@ from parser import LatexParser
     ("\\int(\\cos(x^{12})) \\, dx",ValueError),
 ])
 def test_integrals_calc(input, expected):
-    parsed = LatexParser(input).parse()
+    LatexParser.latex_expression = input
+    parsed = LatexParser.parse()
+    Calculator.parsed_expression = parsed
     if expected == ValueError:
         with pytest.raises(ValueError):
-            Calculator(parsed).result()
+            Calculator.result()
     else:
-        result = Calculator(parsed).result()
+        result = Calculator.result()
         assert result == expected
 
 @pytest.mark.parametrize("input,expected", [
@@ -31,12 +33,14 @@ def test_integrals_calc(input, expected):
     ("\\frac{d(x^{x^2-x})}{dx}",ValueError),
 ])
 def test_derivatives_calc(input, expected):
-    parsed = LatexParser(input).parse()
+    LatexParser.latex_expression = input
+    parsed = LatexParser.parse()
+    Calculator.parsed_expression = parsed
     if expected == ValueError:
         with pytest.raises(ValueError):
-            Calculator(parsed).result()
+            Calculator.result()
     else:
-        result = Calculator(parsed).result()
+        result = Calculator.result()
         assert result == expected
 
 
@@ -47,12 +51,14 @@ def test_derivatives_calc(input, expected):
     ("(3y)(7x)dx=(3y)dy",ValueError),
 ])
 def test_de_calc(input, expected):
-    parsed = LatexParser(input).parse()
+    LatexParser.latex_expression = input
+    parsed = LatexParser.parse()
+    Calculator.parsed_expression = parsed
     if expected == ValueError:
         with pytest.raises(ValueError):
-            Calculator(parsed).result()
+            Calculator.result()
     else:
-        result = Calculator(parsed).result()
+        result = Calculator.result()
         assert result == expected
 
 
@@ -69,9 +75,10 @@ def test_de_calc(input, expected):
     ("(3x)dy=(3y)dx",ValueError),
 ])
 def test_parser(input, expected):   
+    LatexParser.latex_expression = input
     if expected == ValueError:
         with pytest.raises(ValueError):
-            LatexParser(input).parse()
+                LatexParser.parse()
     else:
-        parsed = LatexParser(input).parse()
+        parsed = LatexParser.parse()
         assert parsed['function'] == expected
