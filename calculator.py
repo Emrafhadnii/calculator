@@ -1,33 +1,41 @@
 from parser import LatexParser
 import math
 from matrix import Matrix
-from typing import List,Optional,Tuple,Union
+from typing import List,Optional,Tuple,Union,Dict
 
 class Calculator:
-    def __init__(self, parsed_input: str):
-        self.parsed_input = parsed_input
-        self.type = self.parsed_input['type']
     
+    parsed_expression: Dict
 
-    def result(self) -> Optional[Union[str, float, Matrix]]:
-        if self.type == 'derivative':
-            return self.calculate_derivative()
-        elif self.type == 'integral':
-            return self.calculate_integral()
-        elif self.type == 'matrix operation':
-            return self.matrix_calculations()
-        elif self.type == 'de':
-            return self.calculate_de()
+    @classmethod
+    def result(cls) -> Optional[Union[str, float, Matrix]]:
+        
+        match cls.parsed_expression['type']:
+            case 'derivative':
+                return cls.calculate_derivative(function=cls.parsed_expression['function'],
+                                                var=cls.parsed_expression['var'])   
+            case 'integral':
+                return cls.calculate_integral(function=cls.parsed_expression['function'],
+                                              var=cls.parsed_expression['var'],
+                                              lower=cls.parsed_expression['lower'],
+                                              upper=cls.parsed_expression['upper'])
+            case 'matrix operation':
+                return cls.matrix_calculations(first=cls.parsed_expression['first'],
+                                               second=cls.parsed_expression['second'],
+                                               op=cls.parsed_expression['op'])
+            case 'de':
+                return cls.calculate_de(left_function=cls.parsed_expression['left_function'],
+                                        right_function=cls.parsed_expression['right_function'])
         return None
 
-
-    def _split_terms(self, latex_str: str)-> List:
+    @staticmethod
+    def _split_terms(function: str)-> List:
         try:
-            s = latex_str.replace(' ', '')
+            s = function.replace(' ', '')
             terms = []
             current_term = []
             brace_level = 0
-            
+            stack = []
             i = 0
             n = len(s)
             while i < n:
@@ -44,7 +52,9 @@ class Calculator:
                 
                 if char == '{' or char == '(':
                     brace_level += 1
+                    stack.append(char)
                 elif char == '}' or char == ')':
+                    stack.pop()
                     brace_level -= 1
                 
                 if char in "+-*" and brace_level == 0:
@@ -66,10 +76,9 @@ class Calculator:
             raise ValueError("Invalid expression")
         return terms
 
-
-    def _polynomial_derivative(self, term: str) -> str:
+    @staticmethod
+    def _polynomial_derivative(var: str, term: str) -> str:
         try:
-            var = self.parsed_input['variable']
             if term.find(var) == -1:
                 term += "^0"
                 index = term.find("^")
@@ -109,11 +118,10 @@ class Calculator:
 
         return derived
 
-
-    def _polynominal_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
+    @staticmethod
+    def _polynominal_integral(var: str, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
         try:
             index = term.find("^")
-            var = self.parsed_input['variable']
             value_term = 0
             primary_term = ""
             if index == -1:
@@ -140,12 +148,11 @@ class Calculator:
 
         return value_term,primary_term,new_base,new_power
 
-
-    def _trigonometric_derivative(self, term: str) -> str:
+    @classmethod
+    def _trigonometric_derivative(cls, var: str, term: str) -> str:
         try:
             exp = term.find("(")
             index = term.find("^") 
-            var = self.parsed_input['variable']
             derived_term = ""
 
             if index == -1 or index > exp:
@@ -175,13 +182,8 @@ class Calculator:
             new_base = "" if new_base == 1 else new_base
             new_power = "" if new_power == 1 else new_power
 
-            obj = Calculator({
-                'type': 'derivative',
-                'function': term[term.find("(")+1 : term.rfind(")")],
-                'variable': var,
-                'order': 1
-            })
-            parenthesis_derived = obj.calculate_derivative()
+            parenthesis_derived = cls.calculate_derivative(var=var
+                ,function=term[term.find("(")+1 : term.rfind(")")])
             
             parenthesis_derived = "" if parenthesis_derived == "" else "" if parenthesis_derived == "0" else parenthesis_derived+")*"
 
@@ -247,10 +249,9 @@ class Calculator:
 
         return derived_term.replace("*()","").replace("()*","")
 
-
-    def _trigonometric_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
+    @staticmethod
+    def _trigonometric_integral(var: str, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
         try:
-            var = self.parsed_input['variable']
             if f"{var}^" in term:
                 raise ValueError("Invalid expression")
             value_term = 0
@@ -311,22 +312,16 @@ class Calculator:
 
         return value_term,primary_term,new_base,new_power
 
-
-    def _exponential_derivative(self, term: str) -> str:
+    @classmethod
+    def _exponential_derivative(cls, var: str, term: str) -> str:
         try:
             index = term.find("^")
             if index != -1:
                 power = term[index+1:]
-                var = self.parsed_input['variable']
                 if power[0] == "{" and power[-1] == "}":
                     power = power[1:-1]
-                obj = Calculator({
-                            'type': 'derivative',
-                            'function': power,
-                            'variable': var,
-                            'order': 1
-                        })
-                temp_der = obj.calculate_derivative()
+
+                temp_der = cls.calculate_derivative(function=power, var=var)
                 temp_der = "" if (temp_der == "" or temp_der =="0") else "("+temp_der+")*"
                 base = term[:term.find("e")]
                 new_power = power
@@ -335,32 +330,25 @@ class Calculator:
                 else:
                     new_base = f"(({base}))"
 
-
                 derived = f"{temp_der}{new_base}e^{new_power}"
         except:
             raise ValueError("Invalid expression")
             
         return derived
 
-
-    def _exponential_integral(self, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
+    @classmethod
+    def _exponential_integral(cls, var: str, term: str, lower: Optional[float], upper: Optional[float]) -> Tuple[float, str, float, float]:
         try:
             index = term.find("^")
             power = term[index+1 :].replace("{","",1).replace("}","",1)
-            var = self.parsed_input['variable']
             value_term = 0
             primary_term = ""
             try:
                 base = float(term[:term.find("e")])
             except:
                 base = 1
-            obj = Calculator({
-                'type': 'derivative',
-                'function': power,
-                'variable': var,
-                'order': 1
-            })
-            power_der = obj.calculate_derivative()
+
+            power_der = cls.calculate_derivative(function=power, var=var)
             new_base = 1/float(power_der) * base
             new_power = power
             power_value = float(power[:power.find(var)])
@@ -373,38 +361,24 @@ class Calculator:
 
         return value_term,primary_term,new_base,new_power
 
-
-    def calculate_derivative(self) -> str:
-        derived = ""
-        function = str(self.parsed_input['function'])    
+    @classmethod
+    def calculate_derivative(cls, function: str, var: str) -> str:
+        derived = ""    
         function = function.replace(" ","")
-        terms = self._split_terms(function)
-        var = self.parsed_input['variable']
+        terms = cls._split_terms(function)
         for term in terms:
             try:
                 term = term.replace(f"-{var}",f"-1{var}")
                 if function.find(f"{term}*") != -1 or function.find(f"({term})*") != -1:
                     second_term = terms[terms.index(term)+1]
 
-                    first = Calculator({
-                        'type': 'derivative',
-                        'function': term,
-                        'variable': var,
-                        'order': 1
-                    })
-                    second = Calculator({
-                        'type': 'derivative',
-                        'function': second_term,
-                        'variable': var,
-                        'order': 1
-                    })
                     terms.remove(second_term)
-                    derived_term = "(" + first.calculate_derivative() + f"*({second_term}))+"
-                    derived_term += "(" + second.calculate_derivative() + f"*({term}))"
+                    derived_term = "(" + cls.calculate_derivative(term, var) + f"*({second_term}))+"
+                    derived_term += "(" + cls.calculate_derivative(second_term, var) + f"*({term}))"
 
                 else:
                     if term.find("e^") != -1 and var != "e":
-                        derived_term = self._exponential_derivative(term)
+                        derived_term = cls._exponential_derivative(var, term)
 
                     elif term.find("\\") != -1:
                         var_index = term.find(var)
@@ -412,9 +386,9 @@ class Calculator:
                             new_power = 0
                             new_base = 0
                         else:
-                            derived_term = self._trigonometric_derivative(term)
+                            derived_term = cls._trigonometric_derivative(var=var, term=term)
                     else:
-                        derived_term = self._polynomial_derivative(term)
+                        derived_term = cls._polynomial_derivative(term=term, var=var)
                         
                 if derived_term != "":
                     derived += derived_term + "+"
@@ -433,14 +407,11 @@ class Calculator:
             raise ValueError("unexpected function")
         return derived
 
-
-    def calculate_integral(self) -> Union[float,str]:
-        function = str(self.parsed_input['function'])    
+    @classmethod
+    def calculate_integral(cls, var: str, function: str,
+                        lower: Optional[float], upper: Optional[float]) -> Union[float,str]: 
         function = function.replace(" ","")
-        terms = self._split_terms(function)
-        var = self.parsed_input['variable']
-        lower = self.parsed_input['lower']
-        upper = self.parsed_input['upper']
+        terms = cls._split_terms(function)
         primary = ""
         value = 0
         for term in terms:
@@ -453,11 +424,11 @@ class Calculator:
                 term = term.replace(f"-{var}",f"-1{var}")
 
                 if term.find("e^") != -1 and var != "e":
-                    value_term,primary_term,new_base,new_power = self._exponential_integral(term,lower,upper)
+                    value_term,primary_term,new_base,new_power = cls._exponential_integral(var,term,lower,upper)
                 elif term.find("\\") != -1:
-                    value_term,primary_term,new_base,new_power = self._trigonometric_integral(term,lower,upper)
+                    value_term,primary_term,new_base,new_power = cls._trigonometric_integral(var,term,lower,upper)
                 else:
-                    value_term,primary_term,new_base,new_power = self._polynominal_integral(term,lower,upper)
+                    value_term,primary_term,new_base,new_power = cls._polynominal_integral(var,term,lower,upper)
                     
 
                 if new_base == 1:
@@ -476,27 +447,30 @@ class Calculator:
             raise ValueError("unexpected function")
         return primary+"c" if lower is None or upper is None else round(value,2)
 
-
-    def calculate_de(self) -> str:
+    @classmethod
+    def calculate_de(cls, left_function: Dict, right_function: Dict) -> str:
         try:
-            if ('x' and 'y') in self.parsed_input['left_function']['function']:
+            if right_function['var'] in left_function['function']:
                 raise ValueError("Invalid expression")
-            left_int = Calculator(self.parsed_input['left_function']).calculate_integral()
+            left_int = cls.calculate_integral(var=left_function['var'],
+                                            function=left_function['function'],
+                                            lower=None, upper=None)
 
-            if ('y' and 'x') in self.parsed_input['right_function']['function']:
+            if left_function['var'] in right_function['function']:
                 raise ValueError("Invalid expression")
-            right_int = Calculator(self.parsed_input['right_function']).calculate_integral()
+            right_int = cls.calculate_integral(var=right_function['var'],
+                                              function=right_function['function'],
+                                              lower=None, upper=None)
         
         except:
             raise ValueError("Invalid expression")
         
         return left_int + " = " + right_int.replace("+c","")
 
-
-    def matrix_calculations(self) -> Union[Matrix,float]:
-        matrix1 = Matrix(self.parsed_input['first'])
-        matrix2 = Matrix(self.parsed_input['second'])
-        op = self.parsed_input['op']
+    @classmethod
+    def matrix_calculations(cls, first: List, second: List, op: str) -> Union[Matrix,float]:
+        matrix1 = Matrix(first)
+        matrix2 = Matrix(second)
         
         result = []
         match op:
@@ -522,15 +496,15 @@ class Calculator:
 #         break
 #     latex_input = LatexParser(user_input)
 #     parsed = latex_input.parse()
-#     calc = Calculator(parsed)
-#     result = calc.result()
+#     Calculator.parsed_expression = parsed
+#     result = Calculator.result()
 #     print(f"type: {parsed['type']} \nresult: {result}")
 
 
 """
 sample inputs:
 1.\frac{d(\log(3x^{12}+12x) + x^2)}{dx}
-2.\frac{d(12x^2-2x+1)}{dx}
+2.\frac{d((12x^2-2x+1)+(3x^2))}{dx}
 3.\int(e^{2x} + 1) \, dx
 4.\frac{d(e^{x^2-x})}{dx}
 5.\int_5^10(\log(y)) \, dy
