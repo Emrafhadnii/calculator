@@ -217,49 +217,24 @@ class Calculator:
             new_power = power
             new_base = base
 
-            if term.find("\\sin") != -1:
-                if lower is None or upper is None:
-                    primary_term = f"({-new_base})*cos({var})"
-                else:
-                    value_term = new_base*abs((math.cos(upper)) - (math.cos(lower)))
+            under_line = term.find("_")
+            log_base = 10
+            if under_line != -1:
+                log_base = float(term[under_line+1 : term.find("^")])
+            print(upper)
+            func_map = {
+                "\\sin": f"({-new_base})*cos({var})" if (lower is None or upper is None) else new_base*abs((math.cos(upper)) - (math.cos(lower))),
+                "\\cos": f"({new_base})*sin({var})" if (lower is None or upper is None) else new_base*abs((math.sin(upper)) - (math.sin(lower))),
+                "\\tan": f"({-new_base})*ln|cos({var})|" if (lower is None or upper is None) else new_base*abs((math.log(abs(math.cos(upper)),math.e)) - (math.log(abs(math.cos(lower)),math.e))),
+                "\\cot": f"({new_base})*ln|sin({var})|" if (lower is None or upper is None) else new_base*abs((math.log(abs(math.sin(upper)),math.e)) - (math.log(abs(math.sin(lower)),math.e))),
+                "\\log": f"({new_base})*({var}*(log_{log_base}({var})-(1/ln({log_base}))))" if (lower is None or upper is None) else (new_base*abs((upper*(math.log(upper,log_base)-(1/math.log(log_base,math.e)))) - (lower*(math.log(lower,log_base)-(1/math.log(log_base,math.e)))))),
+                "\\ln": f"({new_base})*({var}*(ln({var})-1))" if (lower is None or upper is None) else new_base*abs((upper*(math.log(upper,math.e)-1)) - (lower*(math.log(lower,math.e)-1)))
+            }
 
-            elif term.find("\\cos") != -1:
-                if lower is None or upper is None:
-                    primary_term = f"({new_base})*sin({var})"
-                else:
-                    value_term = new_base*abs((math.sin(upper)) - (math.sin(lower)))
-
-            elif term.find("\\tan") != -1:
-                if lower is None or upper is None:
-                    primary_term = f"({-new_base})*ln|cos({var})|"
-                else:
-                    value_term = new_base*abs((math.log(math.cos(upper),math.e)) - (math.log(math.cos(lower),math.e)))
-
-            elif term.find("\\cot") != -1:
-                if lower is None or upper is None:
-                    primary_term = f"({new_base})*ln|sin({var})|"
-                else:
-                    value_term = new_base*abs((math.log(math.sin(upper),math.e)) - (math.log(math.sin(lower),math.e)))
-
-            elif term.find("\\log") != -1:
-                under_line = term.find("_")
-                log_base = 10
-                if under_line != -1:
-                    log_base = float(term[under_line+1 : term.find("^")])
-
-                if lower is None or upper is None:
-                    primary_term = f"({new_base})*({var}*(log_{log_base}({var})-(1/ln({log_base}))))"
-                else:
-                    
-                    value_term = new_base*abs((upper*(math.log(upper,log_base)-(1/math.log(log_base,math.e)))) 
-                                            - 
-                                            (lower*(math.log(lower,log_base)-(1/math.log(log_base,math.e)))))
-                
-            elif term.find("\\ln") != -1:
-                if lower is None or upper is None:
-                    primary_term = f"({new_base})*({var}*(ln({var})-1))"
-                else:
-                    value_term = new_base*abs((upper(math.log(upper,math.e)-1)) - (lower(math.log(lower,math.e)-1)))
+            funcs = re.findall(r'\\[a-zA-Z]+|\\.', term)
+            term_result = func_map[str(funcs[0])]
+            value_term = term_result if isinstance(term_result,float) else 0
+            primary_term = term_result if isinstance(term_result,str) else ""
         except:
             raise ValueError("Invalid expression")
 
@@ -479,4 +454,6 @@ sample inputs:
 \frac(log(3x) + y^2))
 \int(e^{2x} + 1) \, dx
 \frac{d(\log(3x^{12}+12x) + x^2)}{dx}
+
+\int_5^10(\log(y)) \, dy
 """
