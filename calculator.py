@@ -3,6 +3,7 @@ import math
 from matrix import Matrix
 from typing import List,Optional,Tuple,Union,Dict
 import re
+from enums import op_types
 
 
 class Calculator:
@@ -13,13 +14,13 @@ class Calculator:
     def result(cls) -> Optional[Union[str, float, Matrix]]:
         
         match cls.parsed_expression['type']:
-            case 'derivative':
+            case op_types.derivative:
                 return cls.calculate_derivative(**cls.parsed_expression)   
-            case 'integral':
+            case op_types.integral:
                 return cls.calculate_integral(**cls.parsed_expression)
-            case 'matrix operation':
+            case op_types.matrix_op:
                 return cls.matrix_calculations(**cls.parsed_expression)
-            case 'de':
+            case op_types.de:
                 return cls.calculate_de(**cls.parsed_expression)
         return None
 

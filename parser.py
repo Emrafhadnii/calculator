@@ -1,6 +1,7 @@
 import re
 from typing import Optional,Union,Dict
 from matrix import Matrix
+from enums import op_types
 
 class LatexParser:
 
@@ -27,7 +28,7 @@ class LatexParser:
         except:
             raise ValueError("Invalid input")
         return {
-            'type': 'de',
+            'type': op_types.de,
             'left_function': left_int,
             'right_function': right_int,
         }
@@ -56,7 +57,7 @@ class LatexParser:
             raise ValueError("Invalid dif")
         
         return{
-            'type': 'derivative',
+            'type': op_types.derivative,
             'function': function,
             'var': var,
             'order': order
@@ -90,7 +91,7 @@ class LatexParser:
             raise ValueError("Invalid dif")
 
         return {
-            'type': 'integral',
+            'type': op_types.integral,
             'function': function,
             'var': var,
             'lower': lower,
@@ -120,7 +121,7 @@ class LatexParser:
             raise ValueError("Invalid input")
         
         return{
-            'type': 'matrix operation',
+            'type': op_types.matrix_op,
             'first': Matrix(matrix1),
             'second': Matrix(matrix2),
             'op': operator
