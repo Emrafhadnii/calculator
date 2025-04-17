@@ -3,7 +3,7 @@ import math
 from matrix import Matrix
 from typing import List,Optional,Tuple,Union,Dict
 import re
-from enums import op_types, keys
+from settings import op_types, keys
 
 
 class Calculator:

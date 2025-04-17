@@ -1,7 +1,7 @@
 import re
 from typing import Optional,Union,Dict
 from matrix import Matrix
-from enums import op_types, keys
+from settings import op_types, keys
 
 class LatexParser:
 

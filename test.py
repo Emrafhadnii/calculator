@@ -2,7 +2,7 @@ import pytest
 from matrix import Matrix
 from calculator import Calculator
 from parser import LatexParser
-from enums import keys
+from settings import keys
 
 @pytest.mark.parametrize("input,expected", [
     ("\\int(e^{2x} + 1) \\, dx","(0.5)*e^(2x)+x+c"),
