@@ -366,6 +366,7 @@ class Calculator:
         derived = ""    
         function = function.replace(" ","")
         terms = cls._split_terms(function)
+        print(terms)
         for term in terms:
             try:
                 term = term.replace(f"-{var}",f"-1{var}")
@@ -377,18 +378,23 @@ class Calculator:
                     derived_term += "(" + cls.calculate_derivative(second_term, var) + f"*({term}))"
 
                 else:
-                    if term.find("e^") != -1 and var != "e":
-                        derived_term = cls._exponential_derivative(var, term)
-
-                    elif term.find("\\") != -1:
-                        var_index = term.find(var)
-                        if var_index == -1:
-                            new_power = 0
-                            new_base = 0
-                        else:
-                            derived_term = cls._trigonometric_derivative(var=var, term=term)
+                    operator_chars = str.maketrans('', '', '+-*')
+                    if len(term) != len(term.translate(operator_chars)) and term[0] != '-':
+                        derived_term = cls.calculate_derivative(function=term, var=var)
                     else:
-                        derived_term = cls._polynomial_derivative(term=term, var=var)
+                        if term.find("e^") != -1 and var != "e":
+                            derived_term = cls._exponential_derivative(var, term)
+
+                        elif term.find("\\") != -1:
+                            var_index = term.find(var)
+                            if var_index == -1:
+                                new_power = 0
+                                new_base = 0
+                                derived_term = ""
+                            else:
+                                derived_term = cls._trigonometric_derivative(var=var, term=term)
+                        else:
+                            derived_term = cls._polynomial_derivative(term=term, var=var)
                         
                 if derived_term != "":
                     derived += derived_term + "+"
@@ -423,20 +429,25 @@ class Calculator:
                 
                 term = term.replace(f"-{var}",f"-1{var}")
 
-                if term.find("e^") != -1 and var != "e":
-                    value_term,primary_term,new_base,new_power = cls._exponential_integral(var,term,lower,upper)
-                elif term.find("\\") != -1:
-                    value_term,primary_term,new_base,new_power = cls._trigonometric_integral(var,term,lower,upper)
+                operator_chars = str.maketrans('', '', '+-*')
+                if len(term) != len(term.translate(operator_chars)) and term[0] != '-':
+                    term_out = cls.calculate_integral(function=term, var=var,lower=lower,upper=upper)
+                    primary_term = term_out.replace("+c","") if isinstance(term_out,str) else ""
+                    value_term = term_out if isinstance(term_out,float) else 0                
                 else:
-                    value_term,primary_term,new_base,new_power = cls._polynominal_integral(var,term,lower,upper)
-                    
-
-                if new_base == 1:
-                    primary_term = primary_term.replace(f"({new_base})*","",1)
-                if new_power == 1:
-                    primary_term = primary_term.replace(f"^({new_power})","",1)
-                if new_power == 0:
-                    primary_term = primary_term.replace(f"*{var}^({new_power})","",1)        
+                    if term.find("e^") != -1 and var != "e":
+                        value_term,primary_term,new_base,new_power = cls._exponential_integral(var,term,lower,upper)
+                    elif term.find("\\") != -1:
+                        value_term,primary_term,new_base,new_power = cls._trigonometric_integral(var,term,lower,upper)
+                    else:
+                        value_term,primary_term,new_base,new_power = cls._polynominal_integral(var,term,lower,upper)
+            
+                    if new_base == 1:
+                        primary_term = primary_term.replace(f"({new_base})*","",1)
+                    if new_power == 1:
+                        primary_term = primary_term.replace(f"^({new_power})","",1)
+                    if new_power == 0:
+                        primary_term = primary_term.replace(f"*{var}^({new_power})","",1)        
 
                 value += value_term
                 primary += primary_term + "+"
@@ -494,8 +505,8 @@ class Calculator:
 #     user_input = str(input("Enter LaTeX expression: "))
 #     if user_input == "exit":
 #         break
-#     latex_input = LatexParser(user_input)
-#     parsed = latex_input.parse()
+#     LatexParser.latex_expression = user_input
+#     parsed = LatexParser.parse()
 #     Calculator.parsed_expression = parsed
 #     result = Calculator.result()
 #     print(f"type: {parsed['type']} \nresult: {result}")
@@ -505,7 +516,7 @@ class Calculator:
 sample inputs:
 1.\frac{d(\log(3x^{12}+12x) + x^2)}{dx}
 2.\frac{d((12x^2-2x+1)+(3x^2))}{dx}
-3.\int(e^{2x} + 1) \, dx
+3.\int_5^10((12x^2-2x+1)+(3x^2)) \, dx
 4.\frac{d(e^{x^2-x})}{dx}
 5.\int_5^10(\log(y)) \, dy
 6.\frac{d(2y*3y)}{dy}
