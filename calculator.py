@@ -3,7 +3,7 @@ import math
 from matrix import Matrix
 from typing import List,Optional,Tuple,Union,Dict
 import re
-from enums import op_types
+from enums import op_types, keys
 
 
 class Calculator:
@@ -13,14 +13,14 @@ class Calculator:
     @classmethod
     def result(cls) -> Optional[Union[str, float, Matrix]]:
         
-        match cls.parsed_expression['type']:
-            case op_types.derivative:
+        match cls.parsed_expression[keys.type.value]:
+            case op_types.derivative.value:
                 return cls.calculate_derivative(**cls.parsed_expression)   
-            case op_types.integral:
+            case op_types.integral.value:
                 return cls.calculate_integral(**cls.parsed_expression)
-            case op_types.matrix_op:
+            case op_types.matrix_op.value:
                 return cls.matrix_calculations(**cls.parsed_expression)
-            case op_types.de:
+            case op_types.de.value:
                 return cls.calculate_de(**cls.parsed_expression)
         return None
 
@@ -222,7 +222,7 @@ class Calculator:
             log_base = 10
             if under_line != -1:
                 log_base = float(term[under_line+1 : term.find("^")])
-            print(upper)
+
             func_map = {
                 "\\sin": f"({-new_base})*cos({var})" if (lower is None or upper is None) else new_base*abs((math.cos(upper)) - (math.cos(lower))),
                 "\\cos": f"({new_base})*sin({var})" if (lower is None or upper is None) else new_base*abs((math.sin(upper)) - (math.sin(lower))),
@@ -392,11 +392,11 @@ class Calculator:
     @classmethod
     def calculate_de(cls, left_function: Dict, right_function: Dict, **kwargs) -> str:
         try:
-            if right_function['var'] in left_function['function']:
+            if right_function[keys.var.value] in left_function[keys.function.value]:
                 raise ValueError("Invalid expression")
             left_int = cls.calculate_integral(**left_function)
 
-            if left_function['var'] in right_function['function']:
+            if left_function[keys.var.value] in right_function[keys.function.value]:
                 raise ValueError("Invalid expression")
             right_int = cls.calculate_integral(**right_function)
         

@@ -2,7 +2,7 @@ import pytest
 from matrix import Matrix
 from calculator import Calculator
 from parser import LatexParser
-
+from enums import keys
 
 @pytest.mark.parametrize("input,expected", [
     ("\\int(e^{2x} + 1) \\, dx","(0.5)*e^(2x)+x+c"),
@@ -82,4 +82,4 @@ def test_parser(input, expected):
                 LatexParser.parse()
     else:
         parsed = LatexParser.parse()
-        assert parsed['function'] == expected
+        assert parsed[keys.function.value] == expected

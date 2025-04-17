@@ -1,7 +1,7 @@
 import re
 from typing import Optional,Union,Dict
 from matrix import Matrix
-from enums import op_types
+from enums import op_types, keys
 
 class LatexParser:
 
@@ -28,9 +28,9 @@ class LatexParser:
         except:
             raise ValueError("Invalid input")
         return {
-            'type': op_types.de,
-            'left_function': left_int,
-            'right_function': right_int,
+            keys.type.value: op_types.de.value,
+            keys.left_function.value: left_int,
+            keys.right_function.value: right_int,
         }
 
     @staticmethod
@@ -57,10 +57,10 @@ class LatexParser:
             raise ValueError("Invalid dif")
         
         return{
-            'type': op_types.derivative,
-            'function': function,
-            'var': var,
-            'order': order
+            keys.type.value: op_types.derivative.value,
+            keys.function.value: function,
+            keys.var.value: var,
+            keys.order.value: order
         }
 
     @staticmethod
@@ -91,16 +91,16 @@ class LatexParser:
             raise ValueError("Invalid dif")
 
         return {
-            'type': op_types.integral,
-            'function': function,
-            'var': var,
-            'lower': lower,
-            'upper': upper
+            keys.type.value: op_types.integral.value,
+            keys.function.value: function,
+            keys.var.value: var,
+            keys.lower.value: lower,
+            keys.upper.value: upper
         }
 
     @staticmethod
     def matrix_parser(expression: str) -> Dict[str, Union[str, Matrix]]:
-        sexpression = expression.replace(" ","")
+        expression = expression.replace(" ","")
         
         start = expression.find("}")
         end = expression.find("\\end")
@@ -121,10 +121,10 @@ class LatexParser:
             raise ValueError("Invalid input")
         
         return{
-            'type': op_types.matrix_op,
-            'first': Matrix(matrix1),
-            'second': Matrix(matrix2),
-            'op': operator
+            keys.type.value: op_types.matrix_op.value,
+            keys.first.value: Matrix(matrix1),
+            keys.second.value: Matrix(matrix2),
+            keys.op.value: operator
         }
 
     @classmethod
