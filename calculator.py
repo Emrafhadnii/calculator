@@ -333,11 +333,7 @@ class Calculator:
                     derived += derived_term     
             except:
                 raise ValueError("Invalid expression")
-
-        derived = derived.replace("+-","-")
-        if derived != "":
-            if derived[-1] == "+":
-                derived = derived[:-1]
+        derived = derived.replace("+-", "-").rstrip("+")
         if derived == "":
             return "0"
         if derived == "+":
@@ -377,12 +373,11 @@ class Calculator:
                         primary_term = primary_term.replace(f"({new_base})*","",1)
                     if new_power == 1:
                         primary_term = primary_term.replace(f"^({new_power})","",1)
-                    if new_power == 0:
+                    elif new_power == 0:
                         primary_term = primary_term.replace(f"*{var}^({new_power})","",1)        
 
                 value += value_term
-                primary += primary_term + "+"
-                primary = primary.replace("+-","-")
+                primary += primary_term.replace("+-","-") + "+"
             except:
                 raise ValueError("Invalid expression")
         if primary == "+" and value == 0:
