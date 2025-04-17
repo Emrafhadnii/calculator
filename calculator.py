@@ -345,7 +345,7 @@ class Calculator:
 
     @classmethod
     def calculate_integral(cls, var: str, function: str,
-                        lower: Optional[float], upper: Optional[float], **kwargs) -> Union[float,str]: 
+                        lower: Optional[float] = None, upper: Optional[float] = None, **kwargs) -> Union[float,str]: 
         function = function.replace(" ","")
         terms = cls._split_terms(function)
         primary = ""
@@ -393,15 +393,11 @@ class Calculator:
         try:
             if right_function['var'] in left_function['function']:
                 raise ValueError("Invalid expression")
-            left_int = cls.calculate_integral(var=left_function['var'],
-                                            function=left_function['function'],
-                                            lower=None, upper=None)
+            left_int = cls.calculate_integral(**left_function)
 
             if left_function['var'] in right_function['function']:
                 raise ValueError("Invalid expression")
-            right_int = cls.calculate_integral(var=right_function['var'],
-                                              function=right_function['function'],
-                                              lower=None, upper=None)
+            right_int = cls.calculate_integral(**right_function)
         
         except:
             raise ValueError("Invalid expression")
