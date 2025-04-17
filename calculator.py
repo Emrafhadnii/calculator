@@ -379,7 +379,10 @@ class Calculator:
 
                 else:
                     operator_chars = str.maketrans('', '', '+-*')
-                    if len(term) != len(term.translate(operator_chars)) and term[0] != '-':
+                    if (len(term) != len(term.translate(operator_chars)) and term[0] != '-' 
+                        and not term.startswith("\\") and not term.startswith("e^") 
+                        and not term.startswith(f"{var}^")):
+                        
                         derived_term = cls.calculate_derivative(function=term, var=var)
                     else:
                         if term.find("e^") != -1 and var != "e":
@@ -522,4 +525,6 @@ sample inputs:
 6.\frac{d(2y*3y)}{dy}
 7.(3x)dx=(3y)dy
 \frac(log(3x) + y^2))
+\int(e^{2x} + 1) \, dx
+\frac{d(\log(3x^{12}+12x) + x^2)}{dx}
 """
