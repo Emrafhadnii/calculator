@@ -28,6 +28,7 @@ def test_integrals_calc(input, expected):
     ("\\frac{d(\\log(3x^{12}+12x) + x^2)}{dx}","(36.0x^11.0+12.0)/(3x^{12}+12x)*ln(10)+2.0x"),
     ("\\frac{d(2y*3y)}{dy}","(2.0*(3y))+(3.0*(2y))"),
     ("\\frac{d(e^{x^2-x})}{dx}","(2.0x-1.0)*e^x^2-1x"),
+    ("\\frac{d((12x^2-2x+1)+(3x^2))}{dx}","24.0x-2.0+6.0x"),
     ("\\frac{d(\\log(3x) + y^2)}{dx}",ValueError),
     ("\\frac{d(2y^3y)}{dy}",ValueError),
     ("\\frac{d(x^{x^2-x})}{dx}",ValueError),
