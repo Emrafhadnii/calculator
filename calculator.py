@@ -12,68 +12,48 @@ class Calculator:
         
         match cls.parsed_expression['type']:
             case 'derivative':
-                return cls.calculate_derivative(function=cls.parsed_expression['function'],
-                                                var=cls.parsed_expression['var'])   
+                return cls.calculate_derivative(**cls.parsed_expression)   
             case 'integral':
-                return cls.calculate_integral(function=cls.parsed_expression['function'],
-                                              var=cls.parsed_expression['var'],
-                                              lower=cls.parsed_expression['lower'],
-                                              upper=cls.parsed_expression['upper'])
+                return cls.calculate_integral(**cls.parsed_expression)
             case 'matrix operation':
-                return cls.matrix_calculations(first=cls.parsed_expression['first'],
-                                               second=cls.parsed_expression['second'],
-                                               op=cls.parsed_expression['op'])
+                return cls.matrix_calculations(**cls.parsed_expression)
             case 'de':
-                return cls.calculate_de(left_function=cls.parsed_expression['left_function'],
-                                        right_function=cls.parsed_expression['right_function'])
+                return cls.calculate_de(**cls.parsed_expression)
         return None
 
     @staticmethod
-    def _split_terms(function: str)-> List:
-        try:
-            s = function.replace(' ', '')
-            terms = []
-            current_term = []
-            brace_level = 0
-            stack = []
-            i = 0
-            n = len(s)
-            while i < n:
-                char = s[i]
+    def _split_terms(function: str) -> List:
+        s = function.replace(' ', '')
+        terms, current_term = [], []
+        brace_level, i, n = 0, 0, len(s)
+        while i < n:
+            char = s[i]
+            if char == '\\':
+                command_end = i + 1
+                while command_end < n and s[command_end].isalpha():
+                    command_end += 1
+                current_term.append(s[i:command_end])
+                i = command_end
+                continue
                 
-                if char == '\\':
-                    command_end = i + 1
-                    while command_end < n and s[command_end].isalpha():
-                        command_end += 1
-                    command = s[i:command_end]
-                    current_term.append(command)
-                    i = command_end
-                    continue
+            if char in '{(':
+                brace_level += 1
+            elif char in '})':
+                brace_level -= 1
                 
-                if char == '{' or char == '(':
-                    brace_level += 1
-                    stack.append(char)
-                elif char == '}' or char == ')':
-                    stack.pop()
-                    brace_level -= 1
-                
-                if char in "+-*" and brace_level == 0:
-                    if current_term:
-                        if current_term[0] == "(" and current_term[-1] == (')'):
-                            current_term = current_term[1:-1]
-                        terms.append(''.join(current_term))
-                        current_term = []
-                    if char == '-':
-                        current_term.append(char)
-                else:
-                    current_term.append(char)
-                i += 1
-            if current_term:
-                if current_term[0] == "(" and current_term[-1] == (')'):
-                    current_term = current_term[1:-1]
-                terms.append(''.join(current_term))
-        except:
-            raise ValueError("Invalid expression")
+            if char in '+-*' and brace_level == 0:
+                if current_term:
+                    if current_term[0] == "(" and current_term[-1] == ')':
+                        current_term = current_term[1:-1]
+                    terms.append(''.join(current_term))
+                    current_term = []
+                current_term.append(char) if char == '-' else None
+            else:
+                current_term.append(char)
+            i += 1
+            
+        if current_term:
+            terms.append(''.join(current_term[1:-1] if current_term[0] == '(' and current_term[-1] == ')' else current_term))
         return terms
 
     @staticmethod
@@ -362,11 +342,10 @@ class Calculator:
         return value_term,primary_term,new_base,new_power
 
     @classmethod
-    def calculate_derivative(cls, function: str, var: str) -> str:
-        derived = ""    
+    def calculate_derivative(cls, function: str, var: str, **kwargs) -> str:
+        derived = ""
         function = function.replace(" ","")
         terms = cls._split_terms(function)
-        print(terms)
         for term in terms:
             try:
                 term = term.replace(f"-{var}",f"-1{var}")
@@ -418,7 +397,7 @@ class Calculator:
 
     @classmethod
     def calculate_integral(cls, var: str, function: str,
-                        lower: Optional[float], upper: Optional[float]) -> Union[float,str]: 
+                        lower: Optional[float], upper: Optional[float], **kwargs) -> Union[float,str]: 
         function = function.replace(" ","")
         terms = cls._split_terms(function)
         primary = ""
@@ -462,7 +441,7 @@ class Calculator:
         return primary+"c" if lower is None or upper is None else round(value,2)
 
     @classmethod
-    def calculate_de(cls, left_function: Dict, right_function: Dict) -> str:
+    def calculate_de(cls, left_function: Dict, right_function: Dict, **kwargs) -> str:
         try:
             if right_function['var'] in left_function['function']:
                 raise ValueError("Invalid expression")
@@ -482,7 +461,7 @@ class Calculator:
         return left_int + " = " + right_int.replace("+c","")
 
     @classmethod
-    def matrix_calculations(cls, first: List, second: List, op: str) -> Union[Matrix,float]:
+    def matrix_calculations(cls, first: List, second: List, op: str, **kwargs) -> Union[Matrix,float]:
         matrix1 = Matrix(first)
         matrix2 = Matrix(second)
         
