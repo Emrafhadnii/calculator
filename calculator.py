@@ -2,6 +2,8 @@ from parser import LatexParser
 import math
 from matrix import Matrix
 from typing import List,Optional,Tuple,Union,Dict
+import re
+
 
 class Calculator:
     
@@ -166,61 +168,32 @@ class Calculator:
                 ,function=term[term.find("(")+1 : term.rfind(")")])
             
             parenthesis_derived = "" if parenthesis_derived == "" else "" if parenthesis_derived == "0" else parenthesis_derived+")*"
+           
+            top = "1" if parenthesis_derived.replace("*","",1) == "" else parenthesis_derived.replace("*","",1)
+            under_line = term.find("_")
+            log_base = 10
+            if under_line != -1:
+                log_base = float(term[under_line+1 : term.find("^")])
 
-            if term.find("\\sin") != -1:
-                temp_der = ""
-                if power > 1:
-                    temp_der = f"*sin^{new_power}{term[term.find("(") : term.find(")")]})"
-
-                if new_power == "":
-                    temp_der = temp_der.replace("^","",1)
-
-                derived_term = f"({parenthesis_derived}({new_base})*cos{term[term.find("(") : term.find(")")]})" + temp_der
-
-            elif term.find("\\cos") != -1:
-                temp_der = ""
-                if power > 1:
-                    temp_der = f"*cos^{new_power}{term[term.find("(") : term.find(")")]})"
-
-                if new_power == "":
-                    temp_der = temp_der.replace("^","",1)
-
-                derived_term = f"-({parenthesis_derived}({new_base})*sin{term[term.find("(") : term.find(")")]})" + temp_der
-
-            elif term.find("\\tan") != -1:
-                temp_der = ""
-                if power > 1:
-                    temp_der = f"*tan^{new_power}{term[term.find("(") : term.find(")")]})"
-                
-                if new_power == "":
-                    temp_der = temp_der.replace("^","",1)
-
-                derived_term = f"({parenthesis_derived}({new_base})*(1+tan^2{term[term.find("(") : term.find(")")]}))" + temp_der
-
-            elif term.find("\\cot") != -1:
-                temp_der = ""
-                if power > 1:
-                    temp_der = f"cot^{new_power}{term[term.find("(") : term.find(")")]})"
-                
-                if new_power == "":
-                    temp_der = temp_der.replace("^","",1)
-
-                derived_term = f"-({parenthesis_derived}({new_base})*(1+cot^2{term[term.find("(") : term.find(")")]}))" + temp_der
-
-            elif term.find("\\log") != -1:
-                under_line = term.find("_")
-                log_base = 10
-                if under_line != -1:
-                    log_base = float(term[under_line+1 : term.find("^")])
-
-                parenthesis_derived = parenthesis_derived.replace("*","",1)
-                derived_term = f"({parenthesis_derived}/{term[term.find("(") : term.rfind(")")]})*ln({log_base})"
-                
-
-            elif term.find("\\ln") != -1:
-                parenthesis_derived = parenthesis_derived.replace("*","",1)
-                top = "1" if parenthesis_derived == "" else parenthesis_derived
-                derived_term = f"({top}/({term[term.find("(")+1 : term.rfind(")")]})"
+            temp_dict = {"\\sin": "", "\\cos": "", "\\tan": "", "\\cot": ""}
+            power_der = f"^{new_power}{term[term.find("(") : term.find(")")]})" if new_power != "" else f"^{new_power}{term[term.find("(") : term.find(")")]})".replace("^","",1)
+            if power>1:
+                temp_dict = {
+                    "\\sin": "*sin"+power_der,
+                    "\\cos": "*cos"+power_der,
+                    "\\tan": "*tan"+power_der,
+                    "\\cot": "cot"+power_der
+                }
+            func_map = {
+                "\\sin": f"({parenthesis_derived}({new_base})*cos{term[term.find("(") : term.find(")")]})" + temp_dict['\\sin'],
+                "\\cos": f"-({parenthesis_derived}({new_base})*sin{term[term.find("(") : term.find(")")]})" + temp_dict['\\cos'],
+                "\\tan": f"({parenthesis_derived}({new_base})*(1+tan^2{term[term.find("(") : term.find(")")]}))" + temp_dict['\\tan'],
+                "\\cot": f"-({parenthesis_derived}({new_base})*(1+cot^2{term[term.find("(") : term.find(")")]}))" + temp_dict['\\cot'],
+                "\\log": f"({parenthesis_derived.replace("*","",1)}/{term[term.find("(") : term.rfind(")")]})*ln({log_base})",
+                "\\ln": f"({top}/({term[term.find("(")+1 : term.rfind(")")]})"
+            }
+            funcs = re.findall(r'\\[a-zA-Z]+|\\.', term)
+            derived_term = func_map[str(funcs[0])] if funcs[0] in func_map.keys() else ""
 
             if parenthesis_derived == "":
                 derived_term = derived_term.replace("(","",1)
@@ -496,7 +469,7 @@ class Calculator:
 
 """
 sample inputs:
-1.\frac{d(\log(3x^{12}+12x) + x^2)}{dx}
+1.\frac{d(\ln(3x^{12}+12x) + x^2)}{dx}
 2.\frac{d((12x^2-2x+1)+(3x^2))}{dx}
 3.\int_5^10((12x^2-2x+1)+(3x^2)) \, dx
 4.\frac{d(e^{x^2-x})}{dx}
