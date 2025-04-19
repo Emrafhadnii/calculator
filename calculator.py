@@ -402,36 +402,37 @@ class Calculator:
 
     @classmethod
     def matrix_calculations(cls, first: List, second: List, op: str, **kwargs) -> Union[Matrix,float]:
-        matrix1 = Matrix(first)
-        matrix2 = Matrix(second)
         
         result = []
+        first = Matrix(first)
+        second = Matrix(second) if second != [] else second
+        
         match op:
             case "*":
-                result = matrix1*matrix2
+                result = first*second
             case "+":
-                result = matrix1+matrix2
+                result = first+second
             case "-":
-                result = matrix1-matrix2
+                result = first-second
             case "det":
-                result = matrix1.det()
+                result = first.det()
             case "inverse":
-                result = matrix1.inverse()
+                result = first.inverse()
             case "transpose":
-                result = matrix1.transpose()
+                result = first.transpose()
 
         return result
     
 
-# while True:
-#     user_input = str(input("Enter LaTeX expression: "))
-#     if user_input == "exit":
-#         break
-#     LatexParser.latex_expression = user_input
-#     parsed = LatexParser.parse()
-#     Calculator.parsed_expression = parsed
-#     result = Calculator.result()
-#     print(f"type: {parsed['type']} \nresult: {result}")
+while True:
+    user_input = str(input("Enter LaTeX expression: "))
+    if user_input == "exit":
+        break
+    LatexParser.latex_expression = user_input
+    parsed = LatexParser.parse()
+    Calculator.parsed_expression = parsed
+    result = Calculator.result()
+    print(f"type: {parsed['type']} \nresult: {result}")
 
 
 """
@@ -446,6 +447,8 @@ sample inputs:
 \frac(log(3x) + y^2))
 \int(e^{2x} + 1) \, dx
 \frac{d(\log(3x^{12}+12x) + x^2)}{dx}
-
+\begin{brackets} 2 & 2 & 3 \ 5 & -1 & 6 \end{brackets}*\begin{brackets} 2 & 3 \ 3 & 7 \ 2 & 5 \end{brackets}
+\begin{brackets} 2 & 2 & 3 \ 5 & -1 & 6 \ 4 & 0 & 8 \end{brackets}+\begin{brackets} 2 & 2 & 3 \ 5 & -1 & 6 \ 4 & 0 & 8 \end{brackets}
+\inverse(\begin{brackets} 2 & 2 & 3 \ 5 & -1 & 6 \ 4 & 0 & 8 \end{brackets})
 \int_5^10(\log(y)) \, dy
 """

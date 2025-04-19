@@ -108,7 +108,7 @@ class LatexParser:
         matrix1 = [list(map(int, line.split("&"))) for line in matrix_bound.split("\\")]
 
         if expression.count("\\begin") == 1:
-            matrix2 = None
+            matrix2 = []
             operator = expression[:expression.find("(")].replace("\\","")
         elif expression.count("\\begin") == 2:
             start = expression.find("}",expression.rfind("\\begin"))
@@ -122,8 +122,8 @@ class LatexParser:
         
         return{
             keys.type.value: op_types.matrix_op.value,
-            keys.first.value: Matrix(matrix1),
-            keys.second.value: Matrix(matrix2),
+            keys.first.value: matrix1,
+            keys.second.value: matrix2,
             keys.op.value: operator
         }
 
@@ -139,7 +139,9 @@ class LatexParser:
         if cls.latex_expression.find("=") != -1:
             return cls.dif_eq()
         
-        function = re.findall(r'\\[a-zA-Z]+|\\.', cls.latex_expression)       
+        function = re.findall(r'\\[a-zA-Z]+|\\.', cls.latex_expression)
+        if function[0] in ["\\det","\\inverse","\\transpose"]:
+            return cls.matrix_parser(cls.latex_expression)
         match function[0]:
             case "\\frac":
                 return cls.derivative_parser(cls.latex_expression)
@@ -147,6 +149,6 @@ class LatexParser:
                 return cls.integral_parser(cls.latex_expression)
             case "\\begin":
                 return cls.matrix_parser(cls.latex_expression)
-            
+
         return None
     
